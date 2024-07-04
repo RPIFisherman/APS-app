@@ -6,6 +6,11 @@ import javafx.scene.Scene;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.TransferMode;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
@@ -23,51 +28,99 @@ public class APSDemo extends Application {
 
         stage.setTitle("Gantt Chart Sample");
 
-        String[] machines = new String[]{"Machine 1", "Machine 2", "Machine 3"};
-
         final NumberAxis xAxis = new NumberAxis();
         final CategoryAxis yAxis = new CategoryAxis();
 
         final ygong.APS.GanttChart<Number, String> chart = new ygong.APS.GanttChart<Number, String>(xAxis, yAxis);
-        xAxis.setLabel("");
+        xAxis.setLabel("Time");
         xAxis.setTickLabelFill(Color.CHOCOLATE);
         xAxis.setMinorTickCount(4);
 
-        yAxis.setLabel("");
+        yAxis.setLabel("Machines");
         yAxis.setTickLabelFill(Color.CHOCOLATE);
         yAxis.setTickLabelGap(10);
         yAxis.setCategories(FXCollections.observableArrayList(Arrays.asList(machines)));
+
+        addTestSeries(chart);
 
         chart.setTitle("Machine Monitoring");
         chart.setLegendVisible(false);
         chart.setBlockHeight(50);
         String machine;
 
-        machine = machines[0];
-        XYChart.Series series1 = new XYChart.Series();
-        series1.getData().add(new XYChart.Data(0, machine, new ExtraData(1, "status-red")));
-        series1.getData().add(new XYChart.Data(1, machine, new ExtraData(1, "status-green")));
-        series1.getData().add(new XYChart.Data(2, machine, new ExtraData(1, "status-red")));
-        series1.getData().add(new XYChart.Data(3, machine, new ExtraData(1, "status-green")));
-
-        machine = machines[1];
-        XYChart.Series series2 = new XYChart.Series();
-        series2.getData().add(new XYChart.Data(0, machine, new ExtraData(1, "status-green")));
-        series2.getData().add(new XYChart.Data(1, machine, new ExtraData(1, "status-green")));
-        series2.getData().add(new XYChart.Data(2, machine, new ExtraData(2, "status-red")));
-
-        machine = machines[2];
-        XYChart.Series series3 = new XYChart.Series();
-        series3.getData().add(new XYChart.Data(0, machine, new ExtraData(1, "status-blue")));
-        series3.getData().add(new XYChart.Data(1, machine, new ExtraData(2, "status-red")));
-        series3.getData().add(new XYChart.Data(3, machine, new ExtraData(1, "status-green")));
-
-        chart.getData().addAll(series1, series2, series3);
-
         chart.getStylesheets().add(getClass().getResource("/ganttchart.css").toExternalForm());
 
         Scene scene = new Scene(chart, 620, 350);
         stage.setScene(scene);
         stage.show();
+    }
+
+
+    private static final String[] machines = {"Machine 1", "Machine 2", "Machine 3"};
+    private void addTestSeries(ygong.APS.GanttChart<Number, String> chart) {
+        for (String machine : machines) {
+            XYChart.Series series = new XYChart.Series();
+            series.setName(machine);
+
+            series.getData().add(createData(0, machine, 1, "status-red"));
+            series.getData().add(createData(1, machine, 1, "status-green"));
+            series.getData().add(createData(2, machine, 1, "status-red"));
+            series.getData().add(createData(3, machine, 1, "status-green"));
+
+            chart.getData().add(series);
+        }
+    }
+    private XYChart.Data<Number, String> createData(int start, String machine, int duration, String styleClass) {
+        XYChart.Data<Number, String> data = new XYChart.Data<>(start, machine, new ygong.APS.GanttChart.ExtraData(duration, styleClass));
+        StackPane node = new StackPane();
+        node.getStyleClass().add(styleClass);
+        data.setNode(node);
+
+        enableDragAndDrop(data);
+
+        return data;
+    }
+
+    private void enableDragAndDrop(XYChart.Data<Number, String> data) {
+        StackPane node = (StackPane) data.getNode();
+
+        node.setOnDragDetected(event -> {
+            Dragboard db = node.startDragAndDrop(TransferMode.MOVE);
+            ClipboardContent content = new ClipboardContent();
+            content.putString(data.getYValue());
+            db.setContent(content);
+            event.consume();
+        });
+
+        node.setOnDragOver(event -> {
+            if (event.getGestureSource() != node && event.getDragboard().hasString()) {
+                event.acceptTransferModes(TransferMode.MOVE);
+            }
+            event.consume();
+        });
+
+        node.setOnDragEntered(event -> {
+            if (event.getGestureSource() != node && event.getDragboard().hasString()) {
+                node.setOpacity(0.7);
+            }
+        });
+
+        node.setOnDragExited(event -> {
+            node.setOpacity(1);
+        });
+
+        node.setOnDragDropped(event -> {
+            Dragboard db = event.getDragboard();
+            boolean success = false;
+            if (db.hasString()) {
+                String newMachine = db.getString();
+                data.setYValue(newMachine);
+                success = true;
+            }
+            event.setDropCompleted(success);
+            event.consume();
+        });
+
+        node.setOnDragDone(DragEvent::consume);
     }
 }
