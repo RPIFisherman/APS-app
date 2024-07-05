@@ -1,5 +1,6 @@
 .status-red {
-    -fx-background-color: rgba(128, 0, 0, 0.7);
+    /*-fx-background-color: rgba(128, 0, 0, 0.7);*/
+    -fx-background-color: hex2rgb(0xFF0000, 0.7);
 }
 
 .status-green {
