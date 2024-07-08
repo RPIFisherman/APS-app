@@ -1,12 +1,14 @@
 .status-red {
     /*-fx-background-color: rgba(128, 0, 0, 0.7);*/
-    -fx-background-color: hex2rgb(0xFF0000, 0.7);
+    -fx-background-color: #ff0000;
 }
 
 .status-green {
-    -fx-background-color: rgba(0, 128, 0, 0.7);
+    /*-fx-background-color: rgba(0, 128, 0, 0.7);*/
+    -fx-background-color: #00ff00;
 }
 
 .status-blue {
-    -fx-background-color: rgba(0, 0, 128, 0.7);
+    /*-fx-background-color: rgba(0, 0, 128, 0.7);*/
+    -fx-background-color: #0000ff;
 }
