@@ -5,14 +5,13 @@ import java.util.HashMap;
 import java.util.Objects;
 import java.util.Random;
 import javafx.collections.FXCollections;
-import javafx.scene.Scene;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.paint.Color;
-import javafx.stage.Stage;
 
 public class Scheduler {
+  private final ArrayList<ArrayList<Machine>> _schedules = new ArrayList<>();
   protected HashMap<Integer, Integer> _order_types;
   private int _num_production_types = -1;
   private int _num_machines = -1;
@@ -20,11 +19,10 @@ public class Scheduler {
   private int _max_hours_allowed = -1;
   private double _max_capacity_per_machine = -1;
   private double _min_capacity_per_machine = -1;
-  private ArrayList<ArrayList<Integer>> _order_type_switch_times;
-
+  private ArrayList<ArrayList<Double>> _order_type_switch_times;
   private ArrayList<Order> _orders;
   private ArrayList<Machine> _machines;
-  private ArrayList<ArrayList<Machine>> _schedules;
+  private ArrayList<ArrayList<Stat>> _stats = new ArrayList<>();
 
   private ArrayList<Machine> deepCopy(ArrayList<Machine> machines) {
     ArrayList<Machine> copy = new ArrayList<>(machines.size());
@@ -79,18 +77,18 @@ public class Scheduler {
     assert max_capacity_per_machine > 0;
     assert min_capacity_per_machine >= 0;
     assert max_capacity_per_machine > min_capacity_per_machine;
-    final int ORDER_QUANTITY_GRANULARITY = 10;
+    final int ORDER_QUANTITY_GRANULARITY = 5;
     final int PRODUCT_PACE_GRANULARITY = 10;
     final int PRODUCT_PACE_MIN = 10;
-    final int PRODUCT_PACE_MAX = 21;
-    final int MIN_ORDER_QUANTITY = 10;
+    final int PRODUCT_PACE_MAX = 11;
+    final int MIN_ORDER_QUANTITY = 50;
     final int MAX_ORDER_QUANTITY = 100;
-    final int MIN_ORDER_TYPE_SWITCH_TIME = 1;
-    final int MAX_ORDER_TYPE_SWITCH_TIME = 5;
+    final double MIN_ORDER_TYPE_SWITCH_TIME = 0.0;
+    final double MAX_ORDER_TYPE_SWITCH_TIME = 1.0;
     final int MIN_EARLIEST_START_TIME = 0;
-    final int MAX_EARLIEST_START_TIME = 3;
-    final int MIN_LATEST_DUE_TIME = 0;
-    final int MAX_LATEST_DUE_TIME = 10;
+    final int MAX_EARLIEST_START_TIME = 2;
+    final int MIN_LATEST_DUE_TIME = 20;
+    final int MAX_LATEST_DUE_TIME = 40;
     final int RANDOM_SEED = seed.length == 1 ? seed[0] : 1337;
     // make sure the constant are correct
     assert ORDER_QUANTITY_GRANULARITY <= MIN_ORDER_QUANTITY;
@@ -98,7 +96,7 @@ public class Scheduler {
     assert PRODUCT_PACE_GRANULARITY <= PRODUCT_PACE_MIN;
     assert PRODUCT_PACE_MIN < PRODUCT_PACE_MAX;
     assert MIN_ORDER_QUANTITY < MAX_ORDER_QUANTITY;
-    assert MIN_ORDER_TYPE_SWITCH_TIME > 0;
+    assert MIN_ORDER_TYPE_SWITCH_TIME >= 0;
     assert MIN_ORDER_TYPE_SWITCH_TIME < MAX_ORDER_TYPE_SWITCH_TIME;
 
     Random random = new Random(RANDOM_SEED);
@@ -163,13 +161,9 @@ public class Scheduler {
       _order_type_switch_times.add(new ArrayList<>(_num_production_types));
       for (int j = 0; j < _num_production_types; j++) {
         _order_type_switch_times.get(i).add(
-            random.nextInt(MAX_ORDER_TYPE_SWITCH_TIME -
-                           MIN_ORDER_TYPE_SWITCH_TIME + 1) +
-            MIN_ORDER_TYPE_SWITCH_TIME);
+            j, (random.nextDouble() + MIN_ORDER_TYPE_SWITCH_TIME));
       }
     }
-
-    _schedules = new ArrayList<>();
   }
 
   public void generateAllPossible() {
@@ -187,6 +181,7 @@ public class Scheduler {
       }
       allStats.add(stats);
     }
+    _stats = allStats;
     return allStats;
   }
 
@@ -227,6 +222,8 @@ public class Scheduler {
 
   public ArrayList<ArrayList<Machine>> getSchedules() { return _schedules; }
 
+  public ArrayList<ArrayList<Stat>> getStats() { return _stats; }
+
   public void printSchedules() {
     for (ArrayList<Machine> schedule : _schedules) {
       for (Machine machine : schedule) {
@@ -239,10 +236,8 @@ public class Scheduler {
     }
   }
 
-  public void plotSchedule(final int index) {
+  public GanttChart<Number, String> createChart(final int index) {
     ArrayList<Machine> Schedule = _schedules.get(index);
-    Stage stage = new Stage();
-    stage.setTitle("Plot Schedule " + index);
     ArrayList<String> machine_names = new ArrayList<>();
 
     final NumberAxis xAxis = new NumberAxis();
@@ -251,12 +246,13 @@ public class Scheduler {
     xAxis.setLabel("");
     xAxis.setTickLabelFill(Color.CHOCOLATE);
     xAxis.setMinorTickCount(4);
+    xAxis.setForceZeroInRange(true);
 
     yAxis.setLabel("");
     yAxis.setTickLabelFill(Color.CHOCOLATE);
     yAxis.setTickLabelGap(10);
 
-    chart.setTitle("Schedule " + index);
+    chart.setTitle("Schedule " + (index + 1));
     chart.setLegendVisible(false);
     chart.setBlockHeight(50);
 
@@ -269,6 +265,9 @@ public class Scheduler {
                              new GanttChart.ExtraData(
                                  order.end_time - order.start_time,
                                  Order.OrderStatus.chooseColor(order.status))));
+        series.getData().add(
+            new XYChart.Data(order.start_time, machine.name,
+                             new GanttChart.ExtraData(0.2, "init")));
       }
       chart.getData().add(series);
     }
@@ -276,10 +275,7 @@ public class Scheduler {
 
     chart.getStylesheets().add(
         getClass().getResource("/ganttchart.css").toExternalForm());
-
-    Scene scene = new Scene(chart, 620, 350);
-    stage.setScene(scene);
-    stage.show();
+    return chart;
   }
 
   public final class Stat {

@@ -169,21 +169,21 @@ public class GanttChart<X, Y> extends XYChart<X, Y> {
 
     public static class ExtraData {
 
-        public long length;
+        public double length;
         public String styleClass;
 
 
-        public ExtraData(long lengthMs, String styleClass) {
+        public ExtraData(double lengthMs, String styleClass) {
             super();
             this.length = lengthMs;
             this.styleClass = styleClass;
         }
 
-        public long getLength() {
+        public double getLength() {
             return length;
         }
 
-        public void setLength(long length) {
+        public void setLength(double length) {
             this.length = length;
         }
 
