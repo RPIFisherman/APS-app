@@ -1,3 +1,71 @@
-.status-good {
-    -fx-background-color: lightgreen;
+.status-blue {
+    /*-fx-background-color: rgba(0, 0, 128, 0.7);*/
+    -fx-background-color: #0000ff;
+}
+
+.status-green {
+    -fx-background-color: #2ca02c;
+}
+
+.status-red {
+    -fx-background-color: #d62728;
+}
+
+.status-est-violate {
+    -fx-background-color: #9467bd;
+}
+
+.status-ldt-violate {
+    -fx-background-color: #e377c2;
+}
+
+.init {
+    -fx-background-color: #7f7f7f;
+}
+
+.chart {
+    -fx-padding: 10px;
+}
+
+.chart-content {
+    -fx-padding: 10px;
+}
+
+.chart-legend {
+    -fx-background-color: transparent;
+    -fx-padding: 20px;
+}
+
+.chart-legend-item-symbol {
+    -fx-background-radius: 0;
+}
+
+.chart-legend-item {
+    -fx-text-fill: #191970;
+}
+
+.chart-plot-background {
+    -fx-background-color: #e2ecfe;
+}
+
+.chart-vertical-grid-lines {
+    -fx-stroke: #3278fa;
+}
+
+.chart-horizontal-grid-lines {
+    -fx-stroke: #3278fa;
+}
+
+.chart-alternative-row-fill {
+    -fx-fill: transparent;
+    -fx-stroke: transparent;
+    -fx-stroke-width: 0;
+}
+
+.axis-tick-mark {
+    -fx-stroke: #637040;
+    -fx-stroke-width: 3;
+}
+.axis-minor-tick-mark {
+    -fx-stroke: #859656;
 }
