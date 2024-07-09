@@ -29,39 +29,36 @@ public class Order {
     this.status = status;
   }
 
-  public int getOrderId() {
-    return _order_id;
+  public Order(Order o) {
+    this(o._name, o._order_id, o._quantity, o._production_type_id,
+         o._earliest_start_time, o._latest_due_time, o.start_time, o.end_time,
+         o.machine, o.status);
   }
 
-  public int getQuantity() {
-    return _quantity;
-  }
+  public int getOrderId() {return _order_id;}
 
-  public int getProductionTypeId() {
-    return _production_type_id;
-  }
+  public int getQuantity() {return _quantity;}
 
-  private int statusCheck() throws IllegalStateException {
+  public int getProductionTypeId() {return _production_type_id;}
+
+  private int statusCheck() {
     if (start_time < 0 || end_time < 0) {
       throw new IllegalStateException("Start time and end time must be set");
-    }
-    if (start_time >= _earliest_start_time && end_time <= _latest_due_time) {
+    } else if (start_time >= _earliest_start_time &&
+               end_time <= _latest_due_time) {
       status = OrderStatus.GREEN;
       return OrderStatus.GREEN_CODE;
-    }
-    if (start_time < _earliest_start_time && end_time > _latest_due_time) {
+    } else if (start_time < _earliest_start_time &&
+               end_time > _latest_due_time) {
       status = OrderStatus.RED;
       return OrderStatus.RED_CODE;
-    }
-    if (start_time < _earliest_start_time) {
+    } else if (start_time < _earliest_start_time) {
       status = OrderStatus.EST_VIOLATE;
       return OrderStatus.EST_VIOLATE_CODE;
-    }
-    if (end_time > _latest_due_time) {
+    } else {
       status = OrderStatus.LDT_VIOLATE;
       return OrderStatus.LDT_VIOLATE_CODE;
     }
-    throw new IllegalStateException("Order status is not defined");
   }
 
   @Override
@@ -69,18 +66,32 @@ public class Order {
     return "Order ID: " + _order_id + " Quantity: " + _quantity;
   }
 
-//  // Verbose one
-//  @Override
-//  public String toString() {
-//    return "Order ID: " + _order_id + " Quantity: " + _quantity + " produce "
-//            + "on Machine:"
-//            + " " + machine.machine_id + " from " + start_time + " to " +
-//            end_time + " "
-//            + "Status: " + status;
-//  }
+  @Override
+  public Order clone() {
+    return new Order(this);
+  }
 
-  public void updateStatus() {
-    statusCheck();
+  //  // Verbose one
+  //  @Override
+  //  public String toString() {
+  //    return "Order ID: " + _order_id + " Quantity: " + _quantity + " produce
+  //    "
+  //            + "on Machine:"
+  //            + " " + machine.machine_id + " from " + start_time + " to " +
+  //            end_time + " "
+  //            + "Status: " + status;
+  //  }
+
+  public void updateStatus() {statusCheck();}
+
+  public int setStartEndTime(final int start_time, final int end_time)
+          throws AssertionError {
+    assert start_time < end_time : "Start time must be less than end time";
+    assert start_time >= 0 : "Start time must be non-negative";
+    this.start_time = start_time;
+    this.end_time = end_time;
+    updateStatus();
+    return end_time;
   }
 
   public static final class OrderStatus {
@@ -126,7 +137,7 @@ public class Order {
     }
 
     protected static String chooseColor(String status)
-            throws IllegalArgumentException {
+    throws IllegalArgumentException {
       switch (status) {
         case GREEN:
           return "status-green";
