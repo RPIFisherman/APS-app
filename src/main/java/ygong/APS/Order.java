@@ -71,6 +71,19 @@ public class Order {
     return new Order(this);
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Order order = (Order) o;
+    return _order_id == order._order_id;
+  }
+
+  @Override
+  public int hashCode() {
+    return _order_id;
+  }
+
   //  // Verbose one
   //  @Override
   //  public String toString() {

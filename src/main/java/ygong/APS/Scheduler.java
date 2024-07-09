@@ -275,6 +275,43 @@ public class Scheduler {
 
     chart.getStylesheets().add(
         getClass().getResource("/ganttchart.css").toExternalForm());
+
+    // put the stats on the chart
+    ArrayList<Stat> stat;
+    try {
+      stat = _stats.get(index);
+      long total_time = 0;
+      int num_violation_due_time = 0;
+      int num_violation_start_time = 0;
+      HashMap<Integer, Integer> each_production_type_time = new HashMap<>();
+      for (Stat s : stat) {
+        total_time += s.total_time;
+        num_violation_due_time += s.num_violation_due_time;
+        num_violation_start_time += s.num_violation_start_time;
+        for(int i : s.each_production_type_time.keySet()) {
+          each_production_type_time.put(i, each_production_type_time.getOrDefault(i, 0) + s.each_production_type_time.get(i));
+        }
+      }
+      StringBuilder sb = new StringBuilder();
+      sb.append("Total Time: ").append(total_time).append("\t");
+      sb.append("Num Violation Due Time: ")
+          .append(num_violation_due_time)
+          .append("\t");
+      sb.append("Num Violation Start Time: ")
+          .append(num_violation_start_time)
+          .append("\n");
+      for (int key : each_production_type_time.keySet()) {
+        sb.append("Production Type ")
+            .append(key)
+            .append(": ")
+            .append(each_production_type_time.get(key))
+            .append("\t");
+      }
+      chart.setTitle(chart.getTitle() + "\n" + sb.toString());
+
+    } catch (IndexOutOfBoundsException e) {
+      return chart;
+    }
     return chart;
   }
 

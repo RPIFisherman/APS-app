@@ -18,7 +18,7 @@ public class APSDemo extends Application {
   public void start(Stage stage) {
 
     Scheduler scheduler = new Scheduler();
-    scheduler.initRandom(3, 2, 20, 40, 1.5, 0.5, 1337);
+    scheduler.initRandom(3, 2, 20, 40, 1.3, 0.5, 1337);
     long startTime = System.nanoTime();
     scheduler.generateAllPossible();
     long endTime = System.nanoTime();
@@ -48,7 +48,7 @@ public class APSDemo extends Application {
       tab.setContent(scheduler.createChart(i));
       tabPane.getTabs().add(tab);
     }
-    Scene scene = new Scene(tabPane, 620, 350);
+    Scene scene = new Scene(tabPane, 1280, 720);
     // Set the scene to the stage and show it
     stage.setScene(scene);
     stage.setTitle("Scheduler Application");
