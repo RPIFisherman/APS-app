@@ -7,10 +7,10 @@ public class Order implements Cloneable {
   private final int _order_id;
   private final int _quantity;
   private final int _production_type_id;
-  private final int _earliest_start_time;
-  private final int _latest_due_time;
-  protected int start_time;
-  protected int end_time;
+  final int earliest_start_time;
+  final int latest_due_time;
+  int start_time;
+  int end_time;
   protected Machine machine;
   protected String status;
 
@@ -21,8 +21,8 @@ public class Order implements Cloneable {
     this._order_id = order_id;
     this._quantity = quantity;
     this._production_type_id = production_type_id;
-    this._earliest_start_time = earliest_start_time;
-    this._latest_due_time = latest_due_time;
+    this.earliest_start_time = earliest_start_time;
+    this.latest_due_time = latest_due_time;
     this.start_time = start_time;
     this.end_time = end_time;
     this.machine = machine;
@@ -31,7 +31,7 @@ public class Order implements Cloneable {
 
   public Order(Order o) {
     this(o._name, o._order_id, o._quantity, o._production_type_id,
-         o._earliest_start_time, o._latest_due_time, o.start_time, o.end_time,
+         o.earliest_start_time, o.latest_due_time, o.start_time, o.end_time,
          o.machine, o.status);
   }
 
@@ -44,15 +44,15 @@ public class Order implements Cloneable {
   private int statusCheck() {
     if (start_time < 0 || end_time < 0) {
       throw new IllegalStateException("Start time and end time must be set");
-    } else if (start_time >= _earliest_start_time &&
-               end_time <= _latest_due_time) {
+    } else if (start_time >= earliest_start_time &&
+               end_time <= latest_due_time) {
       status = OrderStatus.GREEN;
       return OrderStatus.GREEN_CODE;
-    } else if (start_time < _earliest_start_time &&
-               end_time > _latest_due_time) {
+    } else if (start_time < earliest_start_time &&
+               end_time > latest_due_time) {
       status = OrderStatus.RED;
       return OrderStatus.RED_CODE;
-    } else if (start_time < _earliest_start_time) {
+    } else if (start_time < earliest_start_time) {
       status = OrderStatus.EST_VIOLATE;
       return OrderStatus.EST_VIOLATE_CODE;
     } else {
@@ -111,8 +111,8 @@ public class Order implements Cloneable {
     return end_time;
   }
 
-  public int getEarliestStartTime() {return _earliest_start_time;}
-  public int getLatestDueTime() {return _latest_due_time;}
+  public int getEarliestStartTime() {return earliest_start_time;}
+  public int getLatestDueTime() {return latest_due_time;}
 
 
   public static final class OrderStatus {

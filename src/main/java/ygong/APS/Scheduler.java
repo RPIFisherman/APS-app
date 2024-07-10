@@ -1,5 +1,7 @@
 package ygong.APS;
 
+import java.text.DecimalFormat;
+import java.util.*;
 import javafx.collections.FXCollections;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
@@ -7,12 +9,10 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.paint.Color;
 import ygong.APS.Machine.Stat;
 
-import java.util.*;
-
 public class Scheduler {
   private final ArrayList<ArrayList<Machine>> _schedules = new ArrayList<>();
   private final SortedMap<Grade, ArrayList<Machine>> _sorted_machines =
-          new TreeMap<>(Grade.gradeComparator);
+      new TreeMap<>(Grade.gradeComparator);
   protected HashMap<Integer, Integer> _order_types;
   private int _num_production_types = -1;
   private int _num_machines = -1;
@@ -36,6 +36,9 @@ public class Scheduler {
     xAxis.setTickLabelFill(Color.CHOCOLATE);
     xAxis.setMinorTickCount(4);
     xAxis.setForceZeroInRange(true);
+    xAxis.setAutoRanging(false);
+    xAxis.setLowerBound(0);
+    xAxis.setUpperBound(40);
 
     yAxis.setLabel("");
     yAxis.setTickLabelFill(Color.CHOCOLATE);
@@ -50,22 +53,21 @@ public class Scheduler {
       XYChart.Series<Number, String> series = new XYChart.Series<>();
       for (Order order : machine.getOrders()) {
         series.getData().add(new XYChart.Data<>(
-                order.start_time, machine.name,
-                new GanttChart.ExtraData(
-                        order.end_time - order.start_time,
-                        Order.OrderStatus.chooseColor(order.status))));
+            order.start_time, machine.name,
+            new GanttChart.ExtraData(
+                order.end_time - order.start_time,
+                Order.OrderStatus.chooseColor(order.status))));
         series.getData().add(
-                new XYChart.Data<>(order.start_time, machine.name,
-                                   new GanttChart.ExtraData(0.2, "init")));
+            new XYChart.Data<>(order.start_time, machine.name,
+                               new GanttChart.ExtraData(0.2, "init")));
       }
       chart.getData().add(series);
     }
     yAxis.setCategories(FXCollections.observableArrayList(machine_names));
 
     chart.getStylesheets().add(
-            Objects.requireNonNull(
-                            Scheduler.class.getResource("/ganttchart.css"))
-                    .toExternalForm());
+        Objects.requireNonNull(Scheduler.class.getResource("/ganttchart.css"))
+            .toExternalForm());
 
     // put the point on the chart
     return chart;
@@ -81,7 +83,7 @@ public class Scheduler {
 
   private void depthFirstSearch(final int order_index,
                                 ArrayList<Machine> machines)
-          throws AssertionError {
+      throws AssertionError {
     assert machines != null;
     assert order_index <= _num_orders;
     if (order_index == _num_orders) {
@@ -106,8 +108,17 @@ public class Scheduler {
     }
   }
 
-  public void init() {
+  public void init(final int num_order_types, final int num_machines,
+                   final int num_orders, final int max_hours_allowed,
+                   final double max_capacity_per_machine,
+                   final double min_capacity_per_machine) {
     // TODO
+    this._num_production_types = num_order_types;
+    this._num_machines = num_machines;
+    this._num_orders = num_orders;
+    this._max_hours_allowed = max_hours_allowed;
+    this._max_capacity_per_machine = max_capacity_per_machine;
+    this._min_capacity_per_machine = min_capacity_per_machine;
     System.err.println("Not implemented");
   }
 
@@ -115,13 +126,13 @@ public class Scheduler {
                          final int num_orders, final int max_hours_allowed,
                          final double max_capacity_per_machine,
                          final double min_capacity_per_machine, Integer... seed)
-          throws AssertionError {
+      throws AssertionError {
     System.out.println(
-            "Init Random Scheduler: order_types: " + num_order_types +
-            " machines: " + num_machines + " orders: " + num_orders +
-            " max_hours_allowed: " + max_hours_allowed +
-            " max_capacity_per_machine: " + max_capacity_per_machine +
-            " min_capacity_per_machine: " + min_capacity_per_machine);
+        "Init Random Scheduler: order_types: " + num_order_types +
+        " machines: " + num_machines + " orders: " + num_orders +
+        " max_hours_allowed: " + max_hours_allowed +
+        " max_capacity_per_machine: " + max_capacity_per_machine +
+        " min_capacity_per_machine: " + min_capacity_per_machine);
     assert seed.length <= 1;
     assert num_order_types > 0;
     assert num_machines > 0;
@@ -180,14 +191,13 @@ public class Scheduler {
                                                MIN_EARLIEST_START_TIME + 1) +
                                 MIN_EARLIEST_START_TIME;
       int latest_due_time =
-              random.nextInt(MAX_LATEST_DUE_TIME - MIN_LATEST_DUE_TIME + 1) +
-              MIN_LATEST_DUE_TIME;
+          random.nextInt(MAX_LATEST_DUE_TIME - MIN_LATEST_DUE_TIME + 1) +
+          MIN_LATEST_DUE_TIME;
       int start_time = -1;
       int end_time = -1;
       boolean init = _orders.add(new Order(
-              "Order " + i, i, quantity, production_type_id,
-              earliest_start_time,
-              latest_due_time, start_time, end_time, null, "init"));
+          "Order " + i, i, quantity, production_type_id, earliest_start_time,
+          latest_due_time, start_time, end_time, null, "init"));
       assert init;
     }
 
@@ -196,16 +206,15 @@ public class Scheduler {
     _machines = new ArrayList<>(_num_machines);
     for (int i = 0; i < _num_machines; i++) {
       HashMap<Integer, Integer> products_pace_per_hour =
-              new HashMap<>(_num_production_types);
+          new HashMap<>(_num_production_types);
       for (int j = 0; j < _num_production_types; j++) {
         products_pace_per_hour.put(
-                j, (random.nextInt(PRODUCT_PACE_MAX - PRODUCT_PACE_MIN + 1) +
-                    PRODUCT_PACE_MIN) /
+            j, (random.nextInt(PRODUCT_PACE_MAX - PRODUCT_PACE_MIN + 1) +
+                PRODUCT_PACE_MIN) /
                    PRODUCT_PACE_GRANULARITY * PRODUCT_PACE_GRANULARITY);
       }
       boolean add =
-              _machines.add(
-                      new Machine("Machine " + i, i, products_pace_per_hour));
+          _machines.add(new Machine("Machine " + i, i, products_pace_per_hour));
       assert add;
     }
 
@@ -215,7 +224,7 @@ public class Scheduler {
       _order_type_switch_times.add(new ArrayList<>(_num_production_types));
       for (int j = 0; j < _num_production_types; j++) {
         _order_type_switch_times.get(i).add(
-                j, (random.nextDouble() + MIN_ORDER_TYPE_SWITCH_TIME));
+            j, (random.nextDouble() + MIN_ORDER_TYPE_SWITCH_TIME));
       }
     }
   }
@@ -231,13 +240,15 @@ public class Scheduler {
   calcAllPossibleSchedule(Integer... weights) {
     assert weights.length <= 4;
     int on_time_weight = (weights.length > 0) ? weights[0] : 40;
-    int makespan_weight = (weights.length > 1) ? weights[1]
-                                               : (100 - on_time_weight) / 2;
-    int est_weight = (weights.length > 2) ? weights[2] :
-                     (100 - on_time_weight - makespan_weight) / 2;
-    int ldt_weight = (weights.length > 3) ? weights[3] : (100 - on_time_weight
-                                                          - makespan_weight
-                                                          - est_weight);
+    int makespan_weight =
+        (weights.length > 1) ? weights[1] : (100 - on_time_weight) / 2;
+    int est_weight = (weights.length > 2)
+                         ? weights[2]
+                         : (100 - on_time_weight - makespan_weight) / 2;
+    int ldt_weight =
+        (weights.length > 3)
+            ? weights[3]
+            : (100 - on_time_weight - makespan_weight - est_weight);
 
     // calculate the work time for each machine
     ArrayList<ArrayList<Stat>> allStats = new ArrayList<>();
@@ -248,8 +259,8 @@ public class Scheduler {
         stats.add(stat);
       }
       _min_makespan = Math.min(
-              _min_makespan,
-              stats.stream().mapToInt(s -> s.total_time).max().isPresent()
+          _min_makespan,
+          stats.stream().mapToInt(s -> s.total_time).max().isPresent()
               ? stats.stream().mapToInt(s -> s.total_time).max().getAsInt()
               : 0);
       allStats.add(stats);
@@ -261,9 +272,9 @@ public class Scheduler {
       grade.calcGradeByWeights(on_time_weight, makespan_weight, est_weight,
                                ldt_weight);
       _sorted_machines.put(grade, stats.stream()
-              .map(s -> s.belong_to)
-              .collect(ArrayList::new, ArrayList::add,
-                       ArrayList::addAll));
+                                      .map(s -> s.belong_to)
+                                      .collect(ArrayList::new, ArrayList::add,
+                                               ArrayList::addAll));
     }
     return allStats;
   }
@@ -273,19 +284,18 @@ public class Scheduler {
     double makespan = 0;
     double est_violation_time = 0;
     double ldt_violation_time = 0;
+    double total_time = 0;
     for (Stat stat : stats) {
       on_time += stat.num_on_time;
       makespan = Math.max(makespan, stat.total_time);
-      est_violation_time += stat.num_violation_due_time;
-      ldt_violation_time += stat.num_violation_start_time;
+      est_violation_time += stat.violation_due_time;
+      ldt_violation_time += stat.violation_start_time;
+      total_time += stat.total_time;
     }
-    on_time = ((double) on_time / _num_orders);
-    makespan = ((double) makespan / _min_makespan) - 1;
-    est_violation_time = 1 - ((double) est_violation_time / _num_orders);
-    ldt_violation_time = 1 - ((double) ldt_violation_time / _num_orders);
-    Grade grade = new Grade(0, on_time, makespan, est_violation_time,
-                            ldt_violation_time);
-    return grade;
+    return new Grade(0, (double)on_time / _num_orders,
+                     2.0 - (((double)makespan / _min_makespan)),
+                     1 - ((double)est_violation_time / total_time),
+                     1 - ((double)ldt_violation_time / total_time));
   }
 
   private Stat calcMachineWorkTime(Machine machine) {
@@ -293,41 +303,40 @@ public class Scheduler {
     int total_time = 0;
     int num_on_time = 0;
     int makespan = 0;
-    int num_violation_due_time = 0;
-    int num_violation_start_time = 0;
+    int violation_due_time = 0;
+    int violation_start_time = 0;
     int previous_index = -1;
     for (Order order : machine.getOrders()) {
       int productionTypeId = order.getProductionTypeId();
-      int duration = (int) Math.ceil(
-              (double) order.getQuantity() /
+      int duration = (int)Math.ceil(
+          (double)order.getQuantity() /
               machine.products_pace_per_hour.get(productionTypeId) +
-              ((previous_index < 0) ? 0
-                                    : _order_type_switch_times.get(
-                                                    previous_index)
-                       .get(productionTypeId)));
+          ((previous_index < 0) ? 0
+                                : _order_type_switch_times.get(previous_index)
+                                      .get(productionTypeId)));
       previous_index = productionTypeId;
       total_time = order.setStartEndTime(total_time, total_time + duration);
       makespan = Math.max(makespan, total_time);
       each_production_type_time.put(
-              productionTypeId,
-              each_production_type_time.getOrDefault(productionTypeId, 0) +
+          productionTypeId,
+          each_production_type_time.getOrDefault(productionTypeId, 0) +
               duration);
       if (Objects.equals(order.status, Order.OrderStatus.LDT_VIOLATE)) {
-        num_violation_due_time++;
+        violation_due_time += order.end_time - order.latest_due_time;
       } else if (Objects.equals(order.status, Order.OrderStatus.EST_VIOLATE)) {
-        num_violation_start_time++;
+        violation_start_time += order.earliest_start_time - order.start_time;
       } else if (Objects.equals(order.status, Order.OrderStatus.RED)) {
-        num_violation_due_time++;
-        num_violation_start_time++;
+        violation_due_time += order.end_time - order.latest_due_time;
+        violation_start_time += order.earliest_start_time - order.start_time;
       } else {
         num_on_time++;
       }
     }
     return new Stat(machine, each_production_type_time, total_time, num_on_time,
-                    makespan, num_violation_due_time, num_violation_start_time);
+                    makespan, violation_due_time, violation_due_time);
   }
 
-  public ArrayList<ArrayList<Machine>> getSchedules() {return _schedules;}
+  public ArrayList<ArrayList<Machine>> getSchedules() { return _schedules; }
 
   public void printSchedules() {
     for (ArrayList<Machine> schedule : _schedules) {
@@ -353,62 +362,69 @@ public class Scheduler {
       return _sorted_machines;
     } else {
       Map<Grade, ArrayList<Machine>> result =
-              new TreeMap<>(Grade.gradeComparator);
+          new TreeMap<>(Grade.gradeComparator);
       if (num > 0) {
-        for (int i = 0; i < num; i++) {
+        // reverse the sorted order
+        Map<Grade, ArrayList<Machine>> reverse_sorted_machines =
+            new TreeMap<>(Collections.reverseOrder(Grade.gradeComparator));
+        reverse_sorted_machines.putAll(_sorted_machines);
+        for (int i = 0; i < num && i < _sorted_machines.size(); i++) {
           Map.Entry<Grade, ArrayList<Machine>> entry =
-                  _sorted_machines.entrySet().iterator().next();
+              reverse_sorted_machines.entrySet().iterator().next();
           result.put(entry.getKey(), entry.getValue());
-          _sorted_machines.remove(entry.getKey());
+          reverse_sorted_machines.remove(entry.getKey());
         }
       } else {
-        for (int i = 0; i < -num; i++) {
+        for (int i = 0; i < -num && i < _sorted_machines.size(); i++) {
           Map.Entry<Grade, ArrayList<Machine>> entry =
-                  _sorted_machines.entrySet().iterator().next();
+              _sorted_machines.entrySet().iterator().next();
           result.put(entry.getKey(), entry.getValue());
           _sorted_machines.remove(entry.getKey());
         }
+        // add back the removed entries
+        _sorted_machines.putAll(result);
       }
-      // add back the removed entries
-      _sorted_machines.putAll(result);
       return result;
     }
   }
 
   public final static class Grade {
-    public final double on_time_;
-    public final double makespan_;
-    public final double est_violation_time;
-    public final double ldt_violation_time;
+    public final double on_time_percentage;
+    public final double makespan_percentage;
+    public final double est_percentage;
+    public final double ldt_percentage;
     // compare parameter for sorted map
     public static Comparator<Grade> gradeComparator =
-            Comparator.comparingDouble(o -> o.grade_);
+        Comparator.comparingDouble(o -> o.grade_);
     double grade_;
 
     Grade(double grade, double on_time, double makespan,
-          double est_violation_time,
-          double ldt_violation_time) {
+          double est_percentage, double ldt_percentage) {
       grade_ = grade;
-      on_time_ = on_time;
-      makespan_ = makespan;
-      this.est_violation_time = est_violation_time;
-      this.ldt_violation_time = ldt_violation_time;
+      on_time_percentage = on_time;
+      makespan_percentage = makespan;
+      this.est_percentage = est_percentage;
+      this.ldt_percentage = ldt_percentage;
     }
 
     void calcGradeByWeights(int on_time_weight, int makespan_weight,
                             int est_weight, int ldt_weight) {
-      grade_ = on_time_ * on_time_weight + makespan_ * makespan_weight +
-               est_violation_time * est_weight +
-               ldt_violation_time * ldt_weight;
+      grade_ = on_time_percentage * on_time_weight + makespan_percentage * makespan_weight +
+               est_percentage * est_weight +
+               ldt_percentage * ldt_weight;
     }
 
     @Override
     public String toString() {
+      DecimalFormat df = new DecimalFormat("0.000");
       return "Grade{"
-             + "grade_=" + grade_ + ", on_time_=" + on_time_ +
-             ", makespan_=" + makespan_ +
-             ", est_violation_time=" + est_violation_time +
-             ", ldt_violation_time=" + ldt_violation_time + '}';
+             + "grade_=" + df.format(grade_) +
+             ", on_time_percentage=" + df.format(on_time_percentage) +
+             ", makespan_percentage=" + df.format(makespan_percentage) +
+             ", est_percentage=" + df.format(est_percentage) +
+             ", ldt_percentage=" + df.format(ldt_percentage) + '}';
     }
+
+    public double getGrade() { return grade_; }
   }
 }

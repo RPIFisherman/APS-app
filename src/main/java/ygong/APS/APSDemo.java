@@ -12,6 +12,7 @@ import ygong.APS.Machine.Stat;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -39,10 +40,9 @@ public class APSDemo extends Application {
                        + (endTime - startTime) / 1000000
                        + "ms");
 
-    //    scheduler.printSchedules();
-    //    schedules.get(0).get(0).getOrders().iterator().next().start_time
+    final int PRINT_NUM = 10;
     System.out.println(schedules.size());
-    if (schedules.size() < 3) {
+    if (schedules.size() < PRINT_NUM) {
       return;
     }
 
@@ -50,12 +50,15 @@ public class APSDemo extends Application {
     TabPane tabPane = new TabPane();
     // print out the best 3 schedules by grade
     Map<Scheduler.Grade, ArrayList<Machine>>
-            grade_map = scheduler.getBestSchedule(3);
+            grade_map = scheduler.getBestSchedule(PRINT_NUM);
+    DecimalFormat df = new DecimalFormat("0.000");
     for (Map.Entry<Scheduler.Grade, ArrayList<Machine>> entry :
             grade_map.entrySet()) {
-      Tab tab = new Tab(Double.toString(entry.getKey().grade_));
+      Tab tab = new Tab(df.format(entry.getKey().getGrade()));
       // add a label
       Label label = new Label(entry.getKey().toString());
+      label.setFont(new javafx.scene.text.Font("Arial", 20));
+      label.setWrapText(true);
       VBox vbox = new VBox();
       vbox.getChildren().addAll(label, Scheduler.createChart(entry.getValue()));
       vbox.setSpacing(10);

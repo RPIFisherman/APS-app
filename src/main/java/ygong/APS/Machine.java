@@ -88,19 +88,19 @@ public class Machine implements Cloneable {
     public final int num_on_time;
     public final int makespan;
 
-    public final int num_violation_due_time;
-    public final int num_violation_start_time;
+    public final int violation_due_time;
+    public final int violation_start_time;
 
     Stat(Machine belong_to, HashMap<Integer, Integer> each_production_type_time,
          int total_time, int num_on_time, int makespan,
-         int num_violation_due_time, int num_violation_start_time) {
+         int violation_due_time, int violation_start_time) {
       this.belong_to = belong_to;
       this.each_production_type_time = new HashMap<>(each_production_type_time);
       this.total_time = total_time;
       this.num_on_time = num_on_time;
       this.makespan = makespan;
-      this.num_violation_due_time = num_violation_due_time;
-      this.num_violation_start_time = num_violation_start_time;
+      this.violation_due_time = violation_due_time;
+      this.violation_start_time = violation_start_time;
     }
   }
 }
