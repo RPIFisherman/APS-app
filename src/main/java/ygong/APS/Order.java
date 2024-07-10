@@ -1,7 +1,7 @@
 // Helper class for Orders
 package ygong.APS;
 
-public class Order {
+public class Order implements Cloneable {
 
   private final String _name;
   private final int _order_id;
@@ -67,8 +67,12 @@ public class Order {
   }
 
   @Override
-  public Order clone() {
-    return new Order(this);
+  public Order clone() throws AssertionError {
+    try {
+      return (Order)super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new AssertionError("Order clone failed");
+    }
   }
 
   @Override
@@ -107,6 +111,10 @@ public class Order {
     return end_time;
   }
 
+  public int getEarliestStartTime() {return _earliest_start_time;}
+  public int getLatestDueTime() {return _latest_due_time;}
+
+
   public static final class OrderStatus {
     public static final String GREEN = "green";
     public static final int GREEN_CODE = 0;
@@ -117,7 +125,7 @@ public class Order {
     public static final String LDT_VIOLATE = "ldt violate";
     public static final int LDT_VIOLATE_CODE = -3;
 
-    protected static String code2Status(int code)
+    private static String code2Status(int code)
             throws IllegalArgumentException {
       switch (code) {
         case GREEN_CODE:
@@ -133,7 +141,7 @@ public class Order {
       }
     }
 
-    protected static int status2Code(String status)
+    private static int status2Code(String status)
             throws IllegalArgumentException {
       switch (status) {
         case GREEN:
@@ -149,7 +157,7 @@ public class Order {
       }
     }
 
-    protected static String chooseColor(String status)
+    static String chooseColor(String status)
     throws IllegalArgumentException {
       switch (status) {
         case GREEN:
@@ -165,7 +173,7 @@ public class Order {
       }
     }
 
-    protected static String chooseColor(int code)
+    private static String chooseColor(int code)
             throws IllegalArgumentException {
       return chooseColor(code2Status(code));
     }
