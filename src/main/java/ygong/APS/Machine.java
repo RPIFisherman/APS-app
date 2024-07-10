@@ -25,10 +25,9 @@ public class Machine implements Cloneable {
     this.products_pace_per_hour = new HashMap<>(machine.products_pace_per_hour);
     this._approx_run_time = machine._approx_run_time;
     this._orders = new LinkedHashSet<>(machine._orders.size());
-    for(Order o : machine._orders) {
+    for (Order o : machine._orders) {
       this._orders.add(o.clone());
     }
-
   }
 
   public void addOrder(Order order) {
@@ -72,7 +71,7 @@ public class Machine implements Cloneable {
     try {
       Machine machine = (Machine)super.clone();
       machine._orders.clear();
-      for(Order o : _orders) {
+      for (Order o : _orders) {
         machine._orders.add(o.clone());
       }
       return machine;
@@ -92,8 +91,8 @@ public class Machine implements Cloneable {
     public final int violation_start_time;
 
     Stat(Machine belong_to, HashMap<Integer, Integer> each_production_type_time,
-         int total_time, int num_on_time, int makespan,
-         int violation_due_time, int violation_start_time) {
+         int total_time, int num_on_time, int makespan, int violation_due_time,
+         int violation_start_time) {
       this.belong_to = belong_to;
       this.each_production_type_time = new HashMap<>(each_production_type_time);
       this.total_time = total_time;

@@ -66,6 +66,7 @@
     -fx-stroke: #637040;
     -fx-stroke-width: 3;
 }
+
 .axis-minor-tick-mark {
     -fx-stroke: #859656;
 }

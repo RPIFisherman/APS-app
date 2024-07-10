@@ -3,16 +3,16 @@ package ygong.APS;
 
 public class Order implements Cloneable {
 
+  final int earliest_start_time;
+  final int latest_due_time;
   private final String _name;
   private final int _order_id;
   private final int _quantity;
   private final int _production_type_id;
-  final int earliest_start_time;
-  final int latest_due_time;
-  int start_time;
-  int end_time;
   protected Machine machine;
   protected String status;
+  int start_time;
+  int end_time;
 
   public Order(String name, int order_id, int quantity, int production_type_id,
                int earliest_start_time, int latest_due_time, int start_time,
@@ -35,11 +35,11 @@ public class Order implements Cloneable {
          o.machine, o.status);
   }
 
-  public int getOrderId() {return _order_id;}
+  public int getOrderId() { return _order_id; }
 
-  public int getQuantity() {return _quantity;}
+  public int getQuantity() { return _quantity; }
 
-  public int getProductionTypeId() {return _production_type_id;}
+  public int getProductionTypeId() { return _production_type_id; }
 
   private int statusCheck() {
     if (start_time < 0 || end_time < 0) {
@@ -48,8 +48,7 @@ public class Order implements Cloneable {
                end_time <= latest_due_time) {
       status = OrderStatus.GREEN;
       return OrderStatus.GREEN_CODE;
-    } else if (start_time < earliest_start_time &&
-               end_time > latest_due_time) {
+    } else if (start_time < earliest_start_time && end_time > latest_due_time) {
       status = OrderStatus.RED;
       return OrderStatus.RED_CODE;
     } else if (start_time < earliest_start_time) {
@@ -77,9 +76,11 @@ public class Order implements Cloneable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    Order order = (Order) o;
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
+    Order order = (Order)o;
     return _order_id == order._order_id;
   }
 
@@ -99,10 +100,10 @@ public class Order implements Cloneable {
   //            + "Status: " + status;
   //  }
 
-  public void updateStatus() {statusCheck();}
+  public void updateStatus() { statusCheck(); }
 
   public int setStartEndTime(final int start_time, final int end_time)
-          throws AssertionError {
+      throws AssertionError {
     assert start_time < end_time : "Start time must be less than end time";
     assert start_time >= 0 : "Start time must be non-negative";
     this.start_time = start_time;
@@ -111,9 +112,9 @@ public class Order implements Cloneable {
     return end_time;
   }
 
-  public int getEarliestStartTime() {return earliest_start_time;}
-  public int getLatestDueTime() {return latest_due_time;}
+  public int getEarliestStartTime() { return earliest_start_time; }
 
+  public int getLatestDueTime() { return latest_due_time; }
 
   public static final class OrderStatus {
     public static final String GREEN = "green";
@@ -126,55 +127,54 @@ public class Order implements Cloneable {
     public static final int LDT_VIOLATE_CODE = -3;
 
     private static String code2Status(int code)
-            throws IllegalArgumentException {
+        throws IllegalArgumentException {
       switch (code) {
-        case GREEN_CODE:
-          return GREEN;
-        case RED_CODE:
-          return RED;
-        case EST_VIOLATE_CODE:
-          return EST_VIOLATE;
-        case LDT_VIOLATE_CODE:
-          return LDT_VIOLATE;
-        default:
-          throw new IllegalArgumentException("Invalid code");
+      case GREEN_CODE:
+        return GREEN;
+      case RED_CODE:
+        return RED;
+      case EST_VIOLATE_CODE:
+        return EST_VIOLATE;
+      case LDT_VIOLATE_CODE:
+        return LDT_VIOLATE;
+      default:
+        throw new IllegalArgumentException("Invalid code");
       }
     }
 
     private static int status2Code(String status)
-            throws IllegalArgumentException {
+        throws IllegalArgumentException {
       switch (status) {
-        case GREEN:
-          return GREEN_CODE;
-        case RED:
-          return RED_CODE;
-        case EST_VIOLATE:
-          return EST_VIOLATE_CODE;
-        case LDT_VIOLATE:
-          return LDT_VIOLATE_CODE;
-        default:
-          throw new IllegalArgumentException("Invalid status");
+      case GREEN:
+        return GREEN_CODE;
+      case RED:
+        return RED_CODE;
+      case EST_VIOLATE:
+        return EST_VIOLATE_CODE;
+      case LDT_VIOLATE:
+        return LDT_VIOLATE_CODE;
+      default:
+        throw new IllegalArgumentException("Invalid status");
       }
     }
 
-    static String chooseColor(String status)
-    throws IllegalArgumentException {
+    static String chooseColor(String status) throws IllegalArgumentException {
       switch (status) {
-        case GREEN:
-          return "status-green";
-        case RED:
-          return "status-red";
-        case EST_VIOLATE:
-          return "status-est-violate";
-        case LDT_VIOLATE:
-          return "status-ldt-violate";
-        default:
-          throw new IllegalArgumentException("Invalid status");
+      case GREEN:
+        return "status-green";
+      case RED:
+        return "status-red";
+      case EST_VIOLATE:
+        return "status-est-violate";
+      case LDT_VIOLATE:
+        return "status-ldt-violate";
+      default:
+        throw new IllegalArgumentException("Invalid status");
       }
     }
 
     private static String chooseColor(int code)
-            throws IllegalArgumentException {
+        throws IllegalArgumentException {
       return chooseColor(code2Status(code));
     }
   }

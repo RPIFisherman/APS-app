@@ -398,8 +398,8 @@ public class Scheduler {
         Comparator.comparingDouble(o -> o.grade_);
     double grade_;
 
-    Grade(double grade, double on_time, double makespan,
-          double est_percentage, double ldt_percentage) {
+    Grade(double grade, double on_time, double makespan, double est_percentage,
+          double ldt_percentage) {
       grade_ = grade;
       on_time_percentage = on_time;
       makespan_percentage = makespan;
@@ -409,20 +409,20 @@ public class Scheduler {
 
     void calcGradeByWeights(int on_time_weight, int makespan_weight,
                             int est_weight, int ldt_weight) {
-      grade_ = on_time_percentage * on_time_weight + makespan_percentage * makespan_weight +
-               est_percentage * est_weight +
-               ldt_percentage * ldt_weight;
+      grade_ = on_time_percentage * on_time_weight +
+               makespan_percentage * makespan_weight +
+               est_percentage * est_weight + ldt_percentage * ldt_weight;
     }
 
     @Override
     public String toString() {
       DecimalFormat df = new DecimalFormat("0.000");
       return "Grade{"
-             + "grade_=" + df.format(grade_) +
-             ", on_time_percentage=" + df.format(on_time_percentage) +
-             ", makespan_percentage=" + df.format(makespan_percentage) +
-             ", est_percentage=" + df.format(est_percentage) +
-             ", ldt_percentage=" + df.format(ldt_percentage) + '}';
+          + "grade_=" + df.format(grade_) +
+          ", on_time_percentage=" + df.format(on_time_percentage) +
+          ", makespan_percentage=" + df.format(makespan_percentage) +
+          ", est_percentage=" + df.format(est_percentage) +
+          ", ldt_percentage=" + df.format(ldt_percentage) + '}';
     }
 
     public double getGrade() { return grade_; }
