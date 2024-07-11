@@ -1,11 +1,4 @@
-package ygong.APS;
-
-import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryMXBean;
-import java.lang.management.MemoryUsage;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Map;
+import com.sun.org.apache.xpath.internal.operations.Or;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -13,10 +6,19 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import ygong.APS.Machine;
 import ygong.APS.Machine.Stat;
+import ygong.APS.Scheduler;
+
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.MemoryUsage;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Map;
 
 public class APSDemo extends Application {
-  public static void main(String[] args) { launch(args); }
+  public static void main(String[] args) {launch(args);}
 
   @Override
   public void start(Stage stage) {
@@ -31,14 +33,16 @@ public class APSDemo extends Application {
     ArrayList<ArrayList<Machine>> schedules = scheduler.getSchedules();
 
     startTime = System.nanoTime();
-    // Weights:
+    // we can directly use default weights
+    // ArrayList<ArrayList<Stat>> stats =
+    //        scheduler.calcAllPossibleSchedule();
+    // Or customize Weights:
     //      on_time(% of product), the products doesn't violate due and earliest
     //      makespan(2-% to the best), the time elapsed to finish all products
     //      est_violate(% of product), violate the earliest start time
     //      ldt_violate(% of product), violate the latest due time
     ArrayList<ArrayList<Stat>> stats =
-//        scheduler.calcAllPossibleSchedule();
-        scheduler.calcAllPossibleSchedule(90, 0, 10, 200);
+            scheduler.calcAllPossibleSchedule(90, 0, 10, 200);
     endTime = System.nanoTime();
     System.out.println("Time elapsed for update all possible schedules: " +
                        (endTime - startTime) / 1000000 + "ms");
@@ -53,10 +57,10 @@ public class APSDemo extends Application {
     TabPane tabPane = new TabPane();
     // print out the best 3 schedules by grade
     Map<Scheduler.Grade, ArrayList<Machine>> grade_map =
-        scheduler.getBestSchedule(PRINT_NUM);
+            scheduler.getBestSchedule(PRINT_NUM);
     DecimalFormat df = new DecimalFormat("0.000");
     for (Map.Entry<Scheduler.Grade, ArrayList<Machine>> entry :
-         grade_map.entrySet()) {
+            grade_map.entrySet()) {
       Tab tab = new Tab(df.format(entry.getKey().getGrade()));
       // add a label
       Label label = new Label(entry.getKey().toString());
@@ -84,6 +88,7 @@ public class APSDemo extends Application {
     MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
     MemoryUsage heapMemoryUsage = memoryBean.getHeapMemoryUsage();
     System.out.println(
-        "Heap Memory Usage: " + heapMemoryUsage.getUsed() / 1024 / 1024 + "MB");
+            "Heap Memory Usage: " + heapMemoryUsage.getUsed() / 1024 / 1024
+            + "MB");
   }
 }

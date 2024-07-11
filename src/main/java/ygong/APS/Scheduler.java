@@ -207,7 +207,7 @@ public class Scheduler {
       int end_time = -1;
       boolean init = _orders.add(new Order(
           "Order " + i, i, quantity, production_type_id, earliest_start_time,
-          delivery_time,latest_due_time, start_time, end_time, null, null));
+          delivery_time, latest_due_time, start_time, end_time, null, null));
       assert init;
     }
 
@@ -344,7 +344,8 @@ public class Scheduler {
       }
     }
     return new Stat(machine, each_production_type_time, total_time, num_on_time,
-                    makespan, num_violation_latest_due_time, num_violation_earlest_start_time);
+                    makespan, num_violation_latest_due_time,
+                    num_violation_earlest_start_time);
   }
 
   public ArrayList<ArrayList<Machine>> getSchedules() { return _schedules; }

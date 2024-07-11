@@ -162,10 +162,12 @@ public class GanttChart<X, Y> extends XYChart<X, Y> {
     final Axis<Y> ya = getYAxis();
     List<X> xData = null;
     List<Y> yData = null;
-    if (xa.isAutoRanging())
+    if (xa.isAutoRanging()) {
       xData = new ArrayList<X>();
-    if (ya.isAutoRanging())
+    }
+    if (ya.isAutoRanging()) {
       yData = new ArrayList<Y>();
+    }
     if (xData != null || yData != null) {
       for (Series<X, Y> series : getData()) {
         for (Data<X, Y> data : series.getData()) {
@@ -179,10 +181,12 @@ public class GanttChart<X, Y> extends XYChart<X, Y> {
           }
         }
       }
-      if (xData != null)
+      if (xData != null) {
         xa.invalidateRange(xData);
-      if (yData != null)
+      }
+      if (yData != null) {
         ya.invalidateRange(yData);
+      }
     }
   }
 
