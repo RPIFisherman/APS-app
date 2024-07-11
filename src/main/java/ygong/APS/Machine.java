@@ -3,7 +3,7 @@ package ygong.APS;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 
-public class Machine {
+public class Machine implements Cloneable {
   public final String name;
   public final int machine_id;
   final HashMap<Integer, Integer> products_pace_per_hour;
@@ -25,10 +25,14 @@ public class Machine {
     this.products_pace_per_hour = new HashMap<>(machine.products_pace_per_hour);
     this._approx_run_time = machine._approx_run_time;
     this._orders = new LinkedHashSet<>(machine._orders.size());
-    for(Order o : machine._orders) {
+    for (Order o : machine._orders) {
       this._orders.add(o.clone());
     }
+  }
 
+  public boolean checkViableOrder(Order order) {
+    return products_pace_per_hour.get(order.getProductionTypeId()) != null &&
+        products_pace_per_hour.get(order.getProductionTypeId()) > 0;
   }
 
   public void addOrder(Order order) {
@@ -68,7 +72,39 @@ public class Machine {
   }
 
   @Override
-  public Machine clone() {
-    return new Machine(this);
+  public Machine clone() throws AssertionError {
+    try {
+      Machine machine = (Machine)super.clone();
+      machine._orders.clear();
+      for (Order o : _orders) {
+        machine._orders.add(o.clone());
+      }
+      return machine;
+    } catch (CloneNotSupportedException e) {
+      throw new AssertionError("Machine clone failed");
+    }
+  }
+
+  public static final class Stat {
+    public final Machine belong_to;
+    public final HashMap<Integer, Integer> each_production_type_time;
+    public final int total_time;
+    public final int num_on_time;
+    public final int makespan;
+
+    public final int num_violation_due_time;
+    public final int num_violation_start_time;
+
+    Stat(Machine belong_to, HashMap<Integer, Integer> each_production_type_time,
+         int total_time, int num_on_time, int makespan, int violation_due_time,
+         int violation_start_time) {
+      this.belong_to = belong_to;
+      this.each_production_type_time = new HashMap<>(each_production_type_time);
+      this.total_time = total_time;
+      this.num_on_time = num_on_time;
+      this.makespan = makespan;
+      this.num_violation_due_time = violation_due_time;
+      this.num_violation_start_time = violation_start_time;
+    }
   }
 }
