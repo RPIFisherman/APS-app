@@ -22,7 +22,7 @@ public class APSDemo extends Application {
   public void start(Stage stage) {
 
     Scheduler scheduler = new Scheduler();
-    scheduler.initRandom(3, 2, 20, 40, 1.3, 0.5, 1337);
+    scheduler.initRandom(3, 2, 20, 40, 1.1, 0.60, 1337);
     long startTime = System.nanoTime();
     scheduler.generateAllPossible();
     long endTime = System.nanoTime();
@@ -31,7 +31,14 @@ public class APSDemo extends Application {
     ArrayList<ArrayList<Machine>> schedules = scheduler.getSchedules();
 
     startTime = System.nanoTime();
-    ArrayList<ArrayList<Stat>> stats = scheduler.calcAllPossibleSchedule();
+    // Weights:
+    //      on_time(% of product), the products doesn't violate due and earliest
+    //      makespan(2-% to the best), the time elapsed to finish all products
+    //      est_violate(% of product), violate the earliest start time
+    //      ldt_violate(% of product), violate the latest due time
+    ArrayList<ArrayList<Stat>> stats =
+//        scheduler.calcAllPossibleSchedule();
+        scheduler.calcAllPossibleSchedule(90, 0, 10, 200);
     endTime = System.nanoTime();
     System.out.println("Time elapsed for update all possible schedules: " +
                        (endTime - startTime) / 1000000 + "ms");
@@ -55,10 +62,12 @@ public class APSDemo extends Application {
       Label label = new Label(entry.getKey().toString());
       label.setFont(new javafx.scene.text.Font("Arial", 20));
       label.setWrapText(true);
+      label.setMaxWidth(1000);
       VBox vbox = new VBox();
-      vbox.getChildren().addAll(label, Scheduler.createChart(entry.getValue()));
-      vbox.setSpacing(10);
+      vbox.getChildren().addAll(label, scheduler.createChart(entry.getValue()));
+      vbox.setSpacing(50);
       vbox.setAlignment(javafx.geometry.Pos.CENTER);
+      tab.setClosable(false);
       tab.setContent(vbox);
       tabPane.getTabs().add(tab);
     }

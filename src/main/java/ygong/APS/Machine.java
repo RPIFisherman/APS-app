@@ -30,6 +30,11 @@ public class Machine implements Cloneable {
     }
   }
 
+  public boolean checkViableOrder(Order order) {
+    return products_pace_per_hour.get(order.getProductionTypeId()) != null &&
+        products_pace_per_hour.get(order.getProductionTypeId()) > 0;
+  }
+
   public void addOrder(Order order) {
     _approx_run_time +=
         (int)Math.ceil((double)order.getQuantity() /
@@ -87,8 +92,8 @@ public class Machine implements Cloneable {
     public final int num_on_time;
     public final int makespan;
 
-    public final int violation_due_time;
-    public final int violation_start_time;
+    public final int num_violation_due_time;
+    public final int num_violation_start_time;
 
     Stat(Machine belong_to, HashMap<Integer, Integer> each_production_type_time,
          int total_time, int num_on_time, int makespan, int violation_due_time,
@@ -98,8 +103,8 @@ public class Machine implements Cloneable {
       this.total_time = total_time;
       this.num_on_time = num_on_time;
       this.makespan = makespan;
-      this.violation_due_time = violation_due_time;
-      this.violation_start_time = violation_start_time;
+      this.num_violation_due_time = violation_due_time;
+      this.num_violation_start_time = violation_start_time;
     }
   }
 }

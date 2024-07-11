@@ -15,11 +15,11 @@
     -fx-background-color: #9467bd;
 }
 
-.status-ldt-violate {
+.status-deli-violate {
     -fx-background-color: #ff9896;
 }
 
-.init {
+.status-init {
     -fx-background-color: #7f7f7f;
 }
 
