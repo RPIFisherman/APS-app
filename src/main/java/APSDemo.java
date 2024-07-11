@@ -45,7 +45,7 @@ public class APSDemo extends Application {
       //      est_violate(% of product), violate the earliest start time
       //      ldt_violate(% of product), violate the latest due time
       ArrayList<ArrayList<Stat>> stats =
-          scheduler.calcAllPossibleSchedule(40, 30, 5, 10);
+          scheduler.calcAllPossibleSchedule(weights[0],weights[1],weights[2],weights[3]);
       endTime = System.nanoTime();
       System.out.println("Time elapsed for update all possible schedules: " +
                          (endTime - startTime) / 1000000 + "ms");
@@ -88,7 +88,6 @@ public class APSDemo extends Application {
       Rectangle2D primScreenBounds = Screen.getPrimary().getVisualBounds();
       stage.setX((primScreenBounds.getWidth() - stage.getWidth()) / 2);
       stage.setY((primScreenBounds.getHeight() - stage.getHeight()) / 2);
-
 
       // check memory usage
       Runtime runtime = Runtime.getRuntime();
@@ -145,7 +144,6 @@ public class APSDemo extends Application {
       int ldt_violate = Integer.parseInt(ldt_violate_field.getText());
 
       int[] weights = {on_time, makespan, est_violate, ldt_violate};
-
       onWeightsSubmitted.accept(weights);
     });
   }
