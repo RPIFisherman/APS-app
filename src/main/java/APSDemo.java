@@ -44,8 +44,8 @@ public class APSDemo extends Application {
       //      makespan(2-% to the best), the time elapsed to finish all products
       //      est_violate(% of product), violate the earliest start time
       //      ldt_violate(% of product), violate the latest due time
-      ArrayList<ArrayList<Stat>> stats =
-          scheduler.calcAllPossibleSchedule(weights[0],weights[1],weights[2],weights[3]);
+      ArrayList<ArrayList<Stat>> stats = scheduler.calcAllPossibleSchedule(
+          weights[0], weights[1], weights[2], weights[3]);
       endTime = System.nanoTime();
       System.out.println("Time elapsed for update all possible schedules: " +
                          (endTime - startTime) / 1000000 + "ms");
