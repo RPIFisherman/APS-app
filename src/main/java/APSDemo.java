@@ -138,6 +138,7 @@ public class APSDemo extends Application {
     stage.show();
 
     submit_button.setOnAction(e -> {
+      submit_button.setDisable(true);
       int on_time = Integer.parseInt(on_time_field.getText());
       int makespan = Integer.parseInt(makespan_field.getText());
       int est_violate = Integer.parseInt(est_violate_field.getText());

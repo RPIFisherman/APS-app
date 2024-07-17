@@ -1,7 +1,5 @@
 package ygong.APS;
 
-import java.text.DecimalFormat;
-import java.util.*;
 import javafx.collections.FXCollections;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
@@ -9,11 +7,17 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.paint.Color;
 import ygong.APS.Machine.Stat;
 
+import java.text.DecimalFormat;
+import java.util.*;
+
 public class Scheduler {
+  // put all the schedules
   private final ArrayList<ArrayList<Machine>> _schedules = new ArrayList<>();
+
+  // connect grade to each schedules
   private final SortedMap<Grade, ArrayList<Machine>> _sorted_machines =
       new TreeMap<>(Grade.gradeComparator);
-  protected HashMap<Integer, Integer> _order_types;
+
   private int _num_production_types = -1;
   private int _num_machines = -1;
   private int _num_orders = -1;
@@ -131,6 +135,12 @@ public class Scheduler {
     System.err.println("Not implemented");
   }
 
+  public void generateAllPossible() {
+    // BAB with DFS to generate all possible schedules
+    _schedules.clear();
+    depthFirstSearch(0, new ArrayList<>(_machines));
+  }
+
   public void initRandom(final int num_order_types, final int num_machines,
                          final int num_orders, final int max_hours_allowed,
                          final double max_capacity_per_machine,
@@ -163,14 +173,6 @@ public class Scheduler {
     final int MIN_LATEST_DUE_TIME = 20;
     final int MAX_LATEST_DUE_TIME = 40;
     final int RANDOM_SEED = seed.length == 1 ? seed[0] : 1337;
-    // make sure the constant are correct
-    assert ORDER_QUANTITY_GRANULARITY <= MIN_ORDER_QUANTITY;
-    assert PRODUCT_PACE_GRANULARITY > 0;
-    assert PRODUCT_PACE_GRANULARITY <= PRODUCT_PACE_MIN;
-    assert PRODUCT_PACE_MIN < PRODUCT_PACE_MAX;
-    assert MIN_ORDER_QUANTITY < MAX_ORDER_QUANTITY;
-    assert MIN_ORDER_TYPE_SWITCH_TIME >= 0;
-    assert MIN_ORDER_TYPE_SWITCH_TIME < MAX_ORDER_TYPE_SWITCH_TIME;
 
     Random random = new Random(RANDOM_SEED);
 
@@ -181,16 +183,11 @@ public class Scheduler {
 
     // generate order types
     _num_production_types = num_order_types;
-    _order_types = new HashMap<>(_num_production_types);
-    for (int i = 0; i < _num_production_types; i++) {
-      _order_types.put(i + 10000, i);
-    }
 
     // generate orders
     _num_orders = num_orders;
     _orders = new ArrayList<>(_num_orders);
     for (int i = 0; i < _num_orders; i++) {
-      int order_type_id = random.nextInt(_num_production_types);
       int quantity = (random.nextInt((MAX_ORDER_QUANTITY - MIN_ORDER_QUANTITY) /
                                      ORDER_QUANTITY_GRANULARITY) +
                       1) *
@@ -234,15 +231,10 @@ public class Scheduler {
       _order_type_switch_times.add(new ArrayList<>(_num_production_types));
       for (int j = 0; j < _num_production_types; j++) {
         _order_type_switch_times.get(i).add(
-            j, (random.nextDouble() + MIN_ORDER_TYPE_SWITCH_TIME));
+            j, (random.nextDouble() % MAX_ORDER_TYPE_SWITCH_TIME +
+                MIN_ORDER_TYPE_SWITCH_TIME));
       }
     }
-  }
-
-  public void generateAllPossible() {
-    // BAB with DFS to generate all possible schedules
-    _schedules.clear();
-    depthFirstSearch(0, new ArrayList<>(_machines));
   }
 
   //  public ArrayList<ArrayList<Stat>> updateAllPossibleSchedule() {
@@ -294,18 +286,16 @@ public class Scheduler {
     double makespan = 0;
     double num_est_violation_time = 0;
     double num_ldt_violation_time = 0;
-    double total_time = 0;
     for (Stat stat : stats) {
       on_time += stat.num_on_time;
       makespan = Math.max(makespan, stat.total_time);
       num_est_violation_time += stat.num_violation_start_time;
       num_ldt_violation_time += stat.num_violation_due_time;
-      total_time += stat.total_time;
     }
-    return new Grade(0.0, (double)on_time / _num_orders,
-                     2.0 - (((double)makespan / _min_makespan)),
-                     1.0 - ((double)num_est_violation_time / _num_orders),
-                     1.0 - ((double)num_ldt_violation_time / _num_orders));
+    return new Grade(0.0, on_time / _num_orders,
+                     2.0 - ((makespan / _min_makespan)),
+                     1.0 - (num_est_violation_time / _num_orders),
+                     1.0 - (num_ldt_violation_time / _num_orders));
   }
 
   private Stat calcMachineWorkTime(Machine machine) {
@@ -314,7 +304,7 @@ public class Scheduler {
     int num_on_time = machine.getOrders().size();
     int makespan = 0;
     int num_violation_latest_due_time = 0;
-    int num_violation_earlest_start_time = 0;
+    int num_violation_earliest_start_time = 0;
     int previous_type_ID = -1;
     for (Order order : machine.getOrders()) {
       int production_type_ID = order.getProductionTypeId();
@@ -337,7 +327,7 @@ public class Scheduler {
       if (Objects.equals(order.status, Order.OrderStatus.DELIVERY_VIOLATE)) {
         num_on_time--;
       } else if (Objects.equals(order.status, Order.OrderStatus.EST_VIOLATE)) {
-        num_violation_earlest_start_time++;
+        num_violation_earliest_start_time++;
       } else if (Objects.equals(order.status, Order.OrderStatus.RED)) {
         num_violation_latest_due_time++;
         num_on_time--;
@@ -345,7 +335,7 @@ public class Scheduler {
     }
     return new Stat(machine, each_production_type_time, total_time, num_on_time,
                     makespan, num_violation_latest_due_time,
-                    num_violation_earlest_start_time);
+                    num_violation_earliest_start_time);
   }
 
   public ArrayList<ArrayList<Machine>> getSchedules() { return _schedules; }
@@ -402,13 +392,13 @@ public class Scheduler {
   }
 
   public final static class Grade {
+    // compare parameter for sorted map
+    public static Comparator<Grade> gradeComparator =
+        Comparator.comparingDouble(o -> o.grade_);
     public final double on_time_percentage;
     public final double makespan_percentage;
     public final double est_percentage;
     public final double ldt_percentage;
-    // compare parameter for sorted map
-    public static Comparator<Grade> gradeComparator =
-        Comparator.comparingDouble(o -> o.grade_);
     double grade_;
 
     Grade(double grade, double on_time, double makespan, double est_percentage,
