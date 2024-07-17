@@ -8,8 +8,5 @@ implemented using the [javafx](https://openjfx.io/) library.
 
 [![Qodana](https://github.com/RPIFisherman/APS-app/actions/workflows/qodana_code_quality.yml/badge.svg)](https://github.com/RPIFisherman/APS-app/actions/workflows/qodana_code_quality.yml)
 
-Add VM Option for JavaFX:
-
-```Intellij IDEA
---module-path <path-to-javafx-sdk> --add-modules javafx.controls,javafx.fxml
-```
+## Project Structure:
+![Project Structure](structure.png)
