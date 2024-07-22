@@ -195,9 +195,9 @@ public class GanttChart<X, Y> extends XYChart<X, Y> {
     public double length;
     public String styleClass;
 
-    public ExtraData(double lengthMs, String styleClass) {
+    public ExtraData(double length, String styleClass) {
       super();
-      this.length = lengthMs;
+      this.length = length;
       this.styleClass = styleClass;
     }
 
