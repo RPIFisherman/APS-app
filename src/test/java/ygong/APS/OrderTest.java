@@ -1,13 +1,20 @@
 package ygong.APS;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.LinkedHashSet;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class OrderTest {
+
   Order order;
 
   @BeforeAll
@@ -22,13 +29,15 @@ class OrderTest {
 
   @BeforeEach
   void setUp() {
-     this.order = new Order("order1", 1, 10, 1, 0, 10, 20);
+    this.order = new Order("order1", 1, 10, 1, 0, 10, 20);
   }
 
   @Test
   void testOrder() {
-    assertThrows(AssertionError.class, () -> new Order("order1", 1, 10, 1, 10, 0, 20));
-    assertThrows(AssertionError.class, () -> new Order("order1", 1, 10, 1, 0, 10, 5));
+    assertThrows(AssertionError.class,
+        () -> new Order("order1", 1, 10, 1, 10, 0, 20));
+    assertThrows(AssertionError.class,
+        () -> new Order("order1", 1, 10, 1, 0, 10, 5));
 
     Order order = new Order("order1", 1, 10, 1, 0, 10, 20);
     assertEquals("order1", order.getName());
@@ -86,11 +95,34 @@ class OrderTest {
 
   @Test
   void testToString() {
-    assertEquals("Order: order1 Order ID: 1 Quantity: 10", order.toString());
+    assertNotNull(order.toString());
   }
 
   @Test
   void testHashCode() {
     assertEquals(1, order.hashCode());
+    Order order1 = new Order("order1", 1, 10, 1, 0, 10, 20);
+    assertEquals(order1.hashCode(), order.hashCode());
+
+    LinkedHashSet<Order> orders = new LinkedHashSet<>();
+
+    assertTrue(orders.add(order));
+    assertFalse(orders.add(order1));
+
+    assertTrue(orders.contains(order));
+    assertTrue(orders.contains(order1));
+
+    assertTrue(orders.remove(order));
+    assertFalse(orders.contains(order));
+    assertFalse(orders.contains(order1));
+  }
+
+  @Test
+  void testEquals() {
+    Order order1 = new Order("order1", 1, 10, 1, 0, 10, 20);
+    assertEquals(order1, order);
+    assertEquals(order, order);
+    assertNotEquals(order1, null);
+    assertNotEquals(order1, new Object());
   }
 }

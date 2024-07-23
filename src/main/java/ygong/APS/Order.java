@@ -4,7 +4,7 @@ package ygong.APS;
 public class Order {
 
   protected final String name;
-  protected final int order_ID; // unique ID recommend, used as hashcode
+  protected final int order_ID; // unique ID REQUIRED, used as hashcode
   protected final int earliest_start_time;
   protected final int delivery_time;
   protected final int latest_due_time;
@@ -70,6 +70,17 @@ public class Order {
         " Order ID: " + order_ID + " Quantity: " + quantity;
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    Order order = (Order) o;
+    return order_ID == order.order_ID;
+  }
 
   @Override
   public int hashCode() {
