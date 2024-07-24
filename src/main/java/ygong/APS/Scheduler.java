@@ -1,157 +1,129 @@
 package ygong.APS;
 
+import static ygong.APS.Rules.aboveCapacity;
+import static ygong.APS.Rules.belowCapacity;
+import static ygong.APS.Rules.orderFitsMachine;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
+import java.util.Random;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import javafx.collections.FXCollections;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.paint.Color;
-import ygong.APS.Machine.Stat;
-
-import java.text.DecimalFormat;
-import java.util.*;
+import ygong.APS.Schedule.MachineWithOrders;
+import ygong.APS.Schedule.OrderWithSchedule;
 
 public class Scheduler {
-  // put all the schedules
-  private final ArrayList<ArrayList<Machine>> _schedules = new ArrayList<>();
 
-  // connect grade to each schedules
-  private final SortedMap<Grade, ArrayList<Machine>> _sorted_machines =
-      new TreeMap<>(Grade.gradeComparator);
-
+  private final List<Schedule> _schedules = new CopyOnWriteArrayList<>();
+  private final ArrayList<Future<Double>> _futures = new ArrayList<>();
+  private int _num_threads = -1;
+  private ExecutorService _executor;
   private int _num_production_types = -1;
   private int _num_machines = -1;
   private int _num_orders = -1;
   private int _max_hours_allowed = -1;
   private double _max_capacity_per_machine = -1;
   private double _min_capacity_per_machine = -1;
-  private int _min_makespan = Integer.MAX_VALUE;
+  private double _min_makespan = Double.MAX_VALUE;
   private ArrayList<ArrayList<Double>> _order_type_switch_times;
   private ArrayList<Order> _orders;
   private ArrayList<Machine> _machines;
 
-  public GanttChart<Number, String>
-  createChart(final ArrayList<Machine> schedule) {
-
-    ArrayList<String> machine_names = new ArrayList<>();
-    final NumberAxis xAxis = new NumberAxis();
-    final CategoryAxis yAxis = new CategoryAxis();
-    final GanttChart<Number, String> chart = new GanttChart<>(xAxis, yAxis);
-    xAxis.setLabel("");
-    xAxis.setTickLabelFill(Color.CHOCOLATE);
-    xAxis.setMinorTickCount(4);
-    xAxis.setForceZeroInRange(true);
-    xAxis.setAutoRanging(false);
-    xAxis.setLowerBound(0);
-    xAxis.setUpperBound(40 * _max_capacity_per_machine);
-
-    yAxis.setLabel("");
-    yAxis.setTickLabelFill(Color.CHOCOLATE);
-    yAxis.setTickLabelGap(10);
-
-    chart.setTitle("Schedule output");
-    chart.setLegendVisible(false);
-    chart.setBlockHeight(50);
-
-    for (Machine machine : schedule) {
-      machine_names.add(machine.name);
-      XYChart.Series<Number, String> series = new XYChart.Series<>();
-      int prev_order_id = -1;
-      for (Order order : machine.getOrders()) {
-        series.getData().add(new XYChart.Data<>(
-            order.start_time, machine.name,
-            new GanttChart.ExtraData(
-                order.end_time - order.start_time,
-                Order.OrderStatus.chooseColor(order.status))));
-        if (prev_order_id != -1) {
-          series.getData().add(new XYChart.Data<>(
-              order.start_time, machine.name,
-              new GanttChart.ExtraData(
-                  _order_type_switch_times
-                      .get(_orders.get(prev_order_id).getProductionTypeId())
-                      .get(order.getProductionTypeId()),
-                  "status-init")));
-        }
-        prev_order_id = order.getOrderId();
-      }
-      chart.getData().add(series);
-    }
-    yAxis.setCategories(FXCollections.observableArrayList(machine_names));
-
-    chart.getStylesheets().add(
-        Objects.requireNonNull(Scheduler.class.getResource("/ganttchart.css"))
-            .toExternalForm());
-
-    // put the point on the chart
-    return chart;
+  public Scheduler() {
+    _num_threads = Runtime.getRuntime().availableProcessors() - 1;
   }
 
-  private ArrayList<Machine> deepCopy(ArrayList<Machine> machines) {
-    ArrayList<Machine> copy = new ArrayList<>(machines.size());
-    for (Machine machine : machines) {
-      copy.add(new Machine(machine));
-    }
-    return copy;
+  public Scheduler(int num_threads) {
+    assert num_threads > 0 : _num_threads = num_threads;
   }
 
-  private void depthFirstSearch(final int order_index,
-                                ArrayList<Machine> machines)
+  private void depthFirstSearch(final int order_index, Schedule schedule)
       throws AssertionError {
-    assert machines != null;
+    assert schedule != null;
     assert order_index <= _num_orders;
     if (order_index == _num_orders) {
-      for (Machine m : machines) {
-        if (m.belowCapacity(_max_hours_allowed, _min_capacity_per_machine)) {
+      for (MachineWithOrders m : schedule) {
+        if (belowCapacity(m, _max_hours_allowed * _min_capacity_per_machine)) {
           return;
         }
       }
-      boolean add = _schedules.add(deepCopy(machines));
-      assert add;
+      Schedule new_schedule = new Schedule(schedule);
+      _schedules.add(new_schedule);
+      // add a new thread to schedule all orders in current schedule
+      _futures.add(_executor.submit(new scheduleOrder(new_schedule, this)));
       return;
     }
     for (int i = 0; i < _num_machines; i++) {
-      Machine machine = machines.get(i);
-      if (machine.aboveCapacity(_max_hours_allowed,
-                                _max_capacity_per_machine) &&
-          machine.checkViableOrder(_orders.get(order_index))) {
+      MachineWithOrders machine = schedule.getMachine(i);
+      if (aboveCapacity(machine, _max_hours_allowed * _max_capacity_per_machine)
+          || !orderFitsMachine(machine, _orders.get(order_index))) {
         return;
       }
       machine.addOrder(_orders.get(order_index));
-      depthFirstSearch(order_index + 1, new ArrayList<>(machines));
+      depthFirstSearch(order_index + 1, new Schedule(schedule));
       machine.removeOrder(_orders.get(order_index));
     }
   }
 
   public void init(final int num_order_types, final int num_machines,
-                   final int num_orders, final int max_hours_allowed,
-                   final double max_capacity_per_machine,
-                   final double min_capacity_per_machine) {
-    // TODO
-    this._num_production_types = num_order_types;
+      final int num_orders, final int max_hours_allowed,
+      final double max_capacity_per_machine,
+      final double min_capacity_per_machine, final ArrayList<Machine> machines,
+      final ArrayList<Order> orders,
+      final ArrayList<ArrayList<Double>> order_type_switch_times) {
     this._num_machines = num_machines;
+    this._num_production_types = num_order_types;
     this._num_orders = num_orders;
     this._max_hours_allowed = max_hours_allowed;
     this._max_capacity_per_machine = max_capacity_per_machine;
     this._min_capacity_per_machine = min_capacity_per_machine;
-    System.err.println("Not implemented");
+    this._order_type_switch_times = order_type_switch_times;
+    // TODO Not implemented correctly
   }
 
   public void generateAllPossible() {
     // BAB with DFS to generate all possible schedules
     _schedules.clear();
-    depthFirstSearch(0, new ArrayList<>(_machines));
+    _executor = Executors.newFixedThreadPool(_num_threads);
+    _futures.clear();
+
+    depthFirstSearch(0, new Schedule(_machines));
+    // ??? Maybe wait until needed(calc grades) to get the result
+
+    // wait for all threads to finish
+    for (Future<Double> future : _futures) {
+      try {
+        _min_makespan = Math.min(_min_makespan, future.get().intValue());
+      } catch (InterruptedException | ExecutionException e) {
+        System.err.println(e.getMessage());
+      }
+    }
+    _executor.shutdown();
+    _futures.clear();
   }
 
   public void initRandom(final int num_order_types, final int num_machines,
-                         final int num_orders, final int max_hours_allowed,
-                         final double max_capacity_per_machine,
-                         final double min_capacity_per_machine, Integer... seed)
+      final int num_orders, final int max_hours_allowed,
+      final double max_capacity_per_machine,
+      final double min_capacity_per_machine, Integer... seed)
       throws AssertionError {
     System.out.println(
-        "Init Random Scheduler: order_types: " + num_order_types +
-        " machines: " + num_machines + " orders: " + num_orders +
-        " max_hours_allowed: " + max_hours_allowed +
-        " max_capacity_per_machine: " + max_capacity_per_machine +
-        " min_capacity_per_machine: " + min_capacity_per_machine);
+        "Init Random Scheduler: order_types: " + num_order_types + " machines: "
+            + num_machines + " orders: " + num_orders + " max_hours_allowed: "
+            + max_hours_allowed + " max_capacity_per_machine: "
+            + max_capacity_per_machine + " min_capacity_per_machine: "
+            + min_capacity_per_machine);
     assert seed.length <= 1;
     assert num_order_types > 0;
     assert num_machines > 0;
@@ -167,7 +139,7 @@ public class Scheduler {
     final int MIN_ORDER_QUANTITY = 50;
     final int MAX_ORDER_QUANTITY = 100;
     final double MIN_ORDER_TYPE_SWITCH_TIME = 0.0;
-    final double MAX_ORDER_TYPE_SWITCH_TIME = 1.0;
+    final double MAX_ORDER_TYPE_SWITCH_TIME = 0.5;
     final int MIN_EARLIEST_START_TIME = 0;
     final int MAX_EARLIEST_START_TIME = 10;
     final int MIN_LATEST_DUE_TIME = 20;
@@ -188,23 +160,21 @@ public class Scheduler {
     _num_orders = num_orders;
     _orders = new ArrayList<>(_num_orders);
     for (int i = 0; i < _num_orders; i++) {
-      int quantity = (random.nextInt((MAX_ORDER_QUANTITY - MIN_ORDER_QUANTITY) /
-                                     ORDER_QUANTITY_GRANULARITY) +
-                      1) *
-                     ORDER_QUANTITY_GRANULARITY;
-      int production_type_id = random.nextInt(_num_production_types);
-      int earliest_start_time = random.nextInt(MAX_EARLIEST_START_TIME -
-                                               MIN_EARLIEST_START_TIME + 1) +
-                                MIN_EARLIEST_START_TIME;
+      int quantity = (random.nextInt((MAX_ORDER_QUANTITY - MIN_ORDER_QUANTITY)
+          / ORDER_QUANTITY_GRANULARITY) + 1) * ORDER_QUANTITY_GRANULARITY;
+      int production_type_ID = random.nextInt(_num_production_types);
+      int earliest_start_time =
+          random.nextInt(MAX_EARLIEST_START_TIME - MIN_EARLIEST_START_TIME + 1)
+              + MIN_EARLIEST_START_TIME;
       int delivery_time =
-          random.nextInt(MAX_LATEST_DUE_TIME - MIN_LATEST_DUE_TIME + 1) +
-          MIN_LATEST_DUE_TIME;
+          random.nextInt(MAX_LATEST_DUE_TIME - MIN_LATEST_DUE_TIME + 1)
+              + MIN_LATEST_DUE_TIME;
       int latest_due_time = delivery_time + 2;
       int start_time = -1;
       int end_time = -1;
-      boolean init = _orders.add(new Order(
-          "Order " + i, i, quantity, production_type_id, earliest_start_time,
-          delivery_time, latest_due_time, start_time, end_time, null, null));
+      boolean init = _orders.add(
+          new Order("Order " + i, i, quantity, production_type_ID,
+              earliest_start_time, delivery_time, latest_due_time));
       assert init;
     }
 
@@ -212,16 +182,16 @@ public class Scheduler {
     _num_machines = num_machines;
     _machines = new ArrayList<>(_num_machines);
     for (int i = 0; i < _num_machines; i++) {
-      HashMap<Integer, Integer> products_pace_per_hour =
-          new HashMap<>(_num_production_types);
+      HashMap<Integer, Integer> products_pace_per_hour = new HashMap<>(
+          _num_production_types);
       for (int j = 0; j < _num_production_types; j++) {
-        products_pace_per_hour.put(
-            j, (random.nextInt(PRODUCT_PACE_MAX - PRODUCT_PACE_MIN + 1) +
-                PRODUCT_PACE_MIN) /
-                   PRODUCT_PACE_GRANULARITY * PRODUCT_PACE_GRANULARITY);
+        products_pace_per_hour.put(j,
+            (random.nextInt(PRODUCT_PACE_MAX - PRODUCT_PACE_MIN + 1)
+                + PRODUCT_PACE_MIN) / PRODUCT_PACE_GRANULARITY
+                * PRODUCT_PACE_GRANULARITY);
       }
-      boolean add =
-          _machines.add(new Machine("Machine " + i, i, products_pace_per_hour));
+      boolean add = _machines.add(
+          new Machine("Machine " + i, i, products_pace_per_hour));
       assert add;
     }
 
@@ -230,204 +200,166 @@ public class Scheduler {
     for (int i = 0; i < _num_production_types; i++) {
       _order_type_switch_times.add(new ArrayList<>(_num_production_types));
       for (int j = 0; j < _num_production_types; j++) {
-        _order_type_switch_times.get(i).add(
-            j, (random.nextDouble() % MAX_ORDER_TYPE_SWITCH_TIME +
-                MIN_ORDER_TYPE_SWITCH_TIME));
+        _order_type_switch_times.get(i).add(j,
+            (random.nextDouble() % MAX_ORDER_TYPE_SWITCH_TIME
+                + MIN_ORDER_TYPE_SWITCH_TIME));
       }
     }
   }
 
-  //  public ArrayList<ArrayList<Stat>> updateAllPossibleSchedule() {
-  public ArrayList<ArrayList<Stat>>
-  calcAllPossibleSchedule(Integer... weights) {
+  /**
+   * Calculate the grade for all schedules based on the weights gives
+   *
+   * @param weights the weights for on_time, makespan, est_violate, ldt_violate.
+   *                if not given, the default weights are used: on_time: 40,
+   *                makespan: 30, est_violate: 15, ldt_violate: 15
+   */
+  public void calcAllSchedulesGrade(Integer... weights) {
     assert weights.length <= 4;
     int on_time_weight = (weights.length > 0) ? weights[0] : 40;
-    int makespan_weight = (weights.length > 1)
-                              ? weights[1]
-                              : Math.max(0, (100 - on_time_weight) / 2);
-    int est_weight =
-        (weights.length > 2)
-            ? weights[2]
-            : Math.max(0, (100 - on_time_weight - makespan_weight) / 2);
-    int ldt_weight = (weights.length > 3)
-                         ? weights[3]
-                         : Math.max(0, (100 - on_time_weight - makespan_weight -
-                                        est_weight));
+    int makespan_weight = (weights.length > 1) ? weights[1]
+        : Math.max(0, (100 - on_time_weight) / 2);
+    int est_weight = (weights.length > 2) ? weights[2]
+        : Math.max(0, (100 - on_time_weight - makespan_weight) / 2);
+    int ldt_weight = (weights.length > 3) ? weights[3]
+        : Math.max(0, (100 - on_time_weight - makespan_weight - est_weight));
 
-    // calculate the work time for each machine
-    ArrayList<ArrayList<Stat>> allStats = new ArrayList<>();
-    for (ArrayList<Machine> schedule : _schedules) {
-      ArrayList<Stat> stats = new ArrayList<>();
-      for (Machine machine : schedule) {
-        Stat stat = calcMachineWorkTime(machine);
-        stats.add(stat);
-      }
-      _min_makespan = Math.min(
-          _min_makespan,
-          stats.stream().mapToInt(s -> s.total_time).max().isPresent()
-              ? stats.stream().mapToInt(s -> s.total_time).max().getAsInt()
-              : 0);
-      allStats.add(stats);
-    }
+    // calc the grades for each schedule
+    _schedules.parallelStream().forEach(schedule -> {
+      schedule.calcStat(_min_makespan, _num_orders);
+      schedule.calcGradeByWeights(on_time_weight, makespan_weight, est_weight,
+          ldt_weight);
+    });
 
-    // calculate the grade for each schedule
-    for (int i = 0; i < allStats.size(); i++) {
-      ArrayList<Stat> stats = allStats.get(i);
-      Grade grade = getGrade(stats);
-      grade.calcGradeByWeights(on_time_weight, makespan_weight, est_weight,
-                               ldt_weight);
-      _sorted_machines.put(grade, _schedules.get(i));
-    }
-    return allStats;
+    _schedules.sort(Schedule.scheduleComparator.reversed());
   }
 
-  private Grade getGrade(ArrayList<Stat> stats) {
-    double on_time = 0;
-    double makespan = 0;
-    double num_est_violation_time = 0;
-    double num_ldt_violation_time = 0;
-    for (Stat stat : stats) {
-      on_time += stat.num_on_time;
-      makespan = Math.max(makespan, stat.total_time);
-      num_est_violation_time += stat.num_violation_start_time;
-      num_ldt_violation_time += stat.num_violation_due_time;
-    }
-    return new Grade(0.0, on_time / _num_orders,
-                     2.0 - ((makespan / _min_makespan)),
-                     1.0 - (num_est_violation_time / _num_orders),
-                     1.0 - (num_ldt_violation_time / _num_orders));
+  public ArrayList<Schedule> getSchedules() {
+    return new ArrayList<>(_schedules);
   }
 
-  private Stat calcMachineWorkTime(Machine machine) {
-    HashMap<Integer, Integer> each_production_type_time = new HashMap<>();
-    int total_time = 0;
-    int num_on_time = machine.getOrders().size();
-    int makespan = 0;
-    int num_violation_latest_due_time = 0;
-    int num_violation_earliest_start_time = 0;
-    int previous_type_ID = -1;
-    for (Order order : machine.getOrders()) {
-      int production_type_ID = order.getProductionTypeId();
-      // calculate the duration with switch time, Ceiling to the closest integer
-      int duration = (int)Math.ceil(
-          (double)order.getQuantity() /
-              machine.products_pace_per_hour.get(production_type_ID) +
-          ((previous_type_ID < 0)
-               ? 0
-               : _order_type_switch_times.get(previous_type_ID)
-                     .get(production_type_ID)));
-      previous_type_ID = production_type_ID;
-      total_time = order.setStartEndTime(total_time, total_time + duration);
-      makespan = Math.max(makespan, total_time);
-      each_production_type_time.put(
-          production_type_ID,
-          each_production_type_time.getOrDefault(production_type_ID, 0) +
-              duration);
-      order.updateStatus();
-      if (Objects.equals(order.status, Order.OrderStatus.DELIVERY_VIOLATE)) {
-        num_on_time--;
-      } else if (Objects.equals(order.status, Order.OrderStatus.EST_VIOLATE)) {
-        num_violation_earliest_start_time++;
-      } else if (Objects.equals(order.status, Order.OrderStatus.RED)) {
-        num_violation_latest_due_time++;
-        num_on_time--;
-      }
-    }
-    return new Stat(machine, each_production_type_time, total_time, num_on_time,
-                    makespan, num_violation_latest_due_time,
-                    num_violation_earliest_start_time);
-  }
-
-  public ArrayList<ArrayList<Machine>> getSchedules() { return _schedules; }
-
-  public void printSchedules() {
-    for (ArrayList<Machine> schedule : _schedules) {
-      for (Machine machine : schedule) {
-        System.out.println(machine);
-        for (Order order : machine.getOrders()) {
-          System.out.println("\t" + order);
-        }
-      }
-      System.out.println();
-    }
+  @Override
+  public String toString() {
+    return "Scheduler{" + "_schedules=" + _schedules + " _num_threads="
+        + _num_threads + ", _num_production_types=" + _num_production_types
+        + ", _num_machines=" + _num_machines + ", _num_orders=" + _num_orders
+        + ", _max_hours_allowed=" + _max_hours_allowed
+        + ", _max_capacity_per_machine=" + _max_capacity_per_machine
+        + ", _min_capacity_per_machine=" + _min_capacity_per_machine
+        + ", _min_makespan=" + _min_makespan + ", _order_type_switch_times="
+        + _order_type_switch_times + ", _orders=" + _orders + ", _machines="
+        + _machines + '}';
   }
 
   public GanttChart<Number, String> createChart(final int index) {
     return createChart(_schedules.get(index));
   }
 
-  // num = o return all schedules
-  // if num >0 , return the best num schedules
-  // if num < 0 , return the worst abs(num) schedules
-  public Map<Grade, ArrayList<Machine>> getBestSchedule(int num) {
-    if (num == 0) {
-      return _sorted_machines;
-    } else {
-      Map<Grade, ArrayList<Machine>> result;
-      if (num > 0) {
-        result = new TreeMap<>(Collections.reverseOrder(Grade.gradeComparator));
-        // reverse the sorted order
-        Map<Grade, ArrayList<Machine>> reverse_sorted_machines =
-            new TreeMap<>(Collections.reverseOrder(Grade.gradeComparator));
-        reverse_sorted_machines.putAll(_sorted_machines);
-        for (int i = 0; i < num && i < _sorted_machines.size(); i++) {
-          Map.Entry<Grade, ArrayList<Machine>> entry =
-              reverse_sorted_machines.entrySet().iterator().next();
-          result.put(entry.getKey(), entry.getValue());
-          reverse_sorted_machines.remove(entry.getKey());
+  public GanttChart<Number, String> createChart(final Schedule schedule) {
+    assert schedule != null;
+
+    ArrayList<String> machine_names = new ArrayList<>();
+    final NumberAxis xAxis = new NumberAxis();
+    final CategoryAxis yAxis = new CategoryAxis();
+    final GanttChart<Number, String> chart = new GanttChart<>(xAxis, yAxis);
+    xAxis.setLabel("Time");
+    xAxis.setTickLabelFill(Color.CHOCOLATE);
+    xAxis.setMinorTickCount(4);
+    xAxis.setForceZeroInRange(true);
+    xAxis.setAutoRanging(false);
+    xAxis.setLowerBound(0);
+    xAxis.setUpperBound(_max_hours_allowed * _max_capacity_per_machine);
+    yAxis.setLabel("Machine name");
+    yAxis.setTickLabelFill(Color.CHOCOLATE);
+    yAxis.setTickLabelGap(10);
+
+    chart.setTitle("Schedule output");
+    chart.setLegendVisible(false);
+    chart.setBlockHeight(50);
+
+    for (MachineWithOrders machine : schedule) {
+      String name = machine.getName();
+      machine_names.add(name);
+      XYChart.Series<Number, String> series = new XYChart.Series<>();
+      int prev_order_ID = -1;
+
+      for (OrderWithSchedule order : machine) {
+        int start_time = order.getStartTime();
+        int end_time = order.getEndTime();
+        series.getData().add(new XYChart.Data<>(start_time, machine.getName(),
+            new GanttChart.ExtraData(end_time - start_time,
+                order.getColorCode())));
+        if (prev_order_ID != -1) {
+          series.getData().add(new XYChart.Data<>(start_time, name,
+              new GanttChart.ExtraData(getSwitchTime(
+                  _orders.get(prev_order_ID).getProductionTypeID(),
+                  order.getProductionTypeID()), "status-init")));
         }
-      } else {
-        result = new TreeMap<>(Grade.gradeComparator);
-        for (int i = 0; i < -num && i < _sorted_machines.size(); i++) {
-          Map.Entry<Grade, ArrayList<Machine>> entry =
-              _sorted_machines.entrySet().iterator().next();
-          result.put(entry.getKey(), entry.getValue());
-          _sorted_machines.remove(entry.getKey());
-        }
-        // add back the removed entries
-        _sorted_machines.putAll(result);
+        prev_order_ID = order.getOrderID();
       }
-      return result;
+      chart.getData().add(series);
+    }
+    yAxis.setCategories(FXCollections.observableArrayList(machine_names));
+
+    chart.getStylesheets().add(
+        Objects.requireNonNull(Scheduler.class.getResource("/ganttchart.css"))
+            .toExternalForm());
+
+    // put the point on the chart
+    return chart;
+  }
+
+  public double getSwitchTime(int i, int j) {
+    return _order_type_switch_times.get(i).get(j);
+  }
+
+  public int getMachineNum() {
+    return _num_machines;
+  }
+
+  public int getOrderNum() {
+    return _num_orders;
+  }
+
+  public double getMaxCapacityPerMachine() {
+    return _max_capacity_per_machine;
+  }
+
+  public double getMinCapacityPerMachine() {
+    return _min_capacity_per_machine;
+  }
+
+  public double getMinMakespan() {
+    return _min_makespan;
+  }
+
+  // num = o return all schedules
+  // if num >0 , return the best num schedules TODO
+  // if num < 0 , return the worst abs(num) schedules
+  public List<Schedule> getBestSchedule(int num) {
+    if (num == 0) {
+      return _schedules;
+    } else if(num > 0) {
+      return _schedules.subList(0, Math.min(num, _schedules.size()));
+    } else {
+      return _schedules.subList(_schedules.size() + num, _schedules.size());
     }
   }
 
-  public final static class Grade {
-    // compare parameter for sorted map
-    public static Comparator<Grade> gradeComparator =
-        Comparator.comparingDouble(o -> o.grade_);
-    public final double on_time_percentage;
-    public final double makespan_percentage;
-    public final double est_percentage;
-    public final double ldt_percentage;
-    double grade_;
+  private static class scheduleOrder implements Callable<Double> {
 
-    Grade(double grade, double on_time, double makespan, double est_percentage,
-          double ldt_percentage) {
-      grade_ = grade;
-      on_time_percentage = on_time;
-      makespan_percentage = makespan;
-      this.est_percentage = est_percentage;
-      this.ldt_percentage = ldt_percentage;
-    }
+    private final Schedule _schedule;
+    private final Scheduler _scheduler;
 
-    void calcGradeByWeights(int on_time_weight, int makespan_weight,
-                            int est_weight, int ldt_weight) {
-      grade_ = on_time_percentage * on_time_weight +
-               makespan_percentage * makespan_weight +
-               est_percentage * est_weight + ldt_percentage * ldt_weight;
+    public scheduleOrder(Schedule schedule, Scheduler scheduler) {
+      this._schedule = schedule;
+      this._scheduler = scheduler;
     }
 
     @Override
-    public String toString() {
-      DecimalFormat df = new DecimalFormat("0.000");
-      return "Grade{"
-          + "grade: " + df.format(grade_) +
-          ", on_time=" + df.format(on_time_percentage * 100) +
-          "%, makespan(2-best%)=" + df.format(makespan_percentage * 100) +
-          "%, earliest=" + df.format(est_percentage * 100) +
-          "%, latest=" + df.format(ldt_percentage * 100) + "%}";
+    public Double call() throws ExecutionException, InterruptedException {
+      _schedule.scheduleAllOrders(_scheduler);
+      return _schedule.getMaxMakespan();
     }
-
-    public double getGrade() { return grade_; }
   }
 }
