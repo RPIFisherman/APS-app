@@ -28,8 +28,8 @@ public class Schedule implements Comparable<Schedule>,
       _grade = null;
     } else {
       _grade = new Grade(s._grade.grade, s._grade.on_time_percentage,
-          s._grade.makespan_percentage,
-          s._grade.est_percentage, s._grade.ldt_percentage);
+          s._grade.makespan_percentage, s._grade.est_percentage,
+          s._grade.ldt_percentage);
     }
   }
 
@@ -100,13 +100,20 @@ public class Schedule implements Comparable<Schedule>,
   }
 
   public Grade calcGradeByWeights(int on_time_weight, int makespan_weight,
-      int est_weight,
-      int ldt_weight) {
+      int est_weight, int ldt_weight) {
     _grade.calcGradeByWeights(on_time_weight, makespan_weight, est_weight,
         ldt_weight);
     return _grade;
   }
 
+  /**
+   * We only consider the grade for comparison, if the grade is the same, we
+   * consider the schedule is the same no matter the order of the
+   * machines/Orders.
+   *
+   * @param o the object to be compared. If o is null, return 1
+   * @return 0 if the grade is the same, 1 if the grade is smaller, -1 if the
+   */
   @Override
   public int compareTo(Schedule o) {
     return Double.compare(this.getGrade(), o.getGrade());
@@ -128,8 +135,8 @@ public class Schedule implements Comparable<Schedule>,
   public String toString() {
     DecimalFormat df = new DecimalFormat("0.000");
     return "Schedule{" + "grade=" + df.format(getGrade()) + ", machines="
-        + _machines.size() + (
-        _grade == null ? "" : ", " + _grade.toString()) + '}';
+        + _machines.size() + (_grade == null ? "" : ", " + _grade.toString())
+        + '}';
   }
 
   @Override
@@ -220,13 +227,16 @@ public class Schedule implements Comparable<Schedule>,
       int prev_id = -1;
       for (OrderWithSchedule o : orders) {
         int production_type_ID = o.order.production_type_ID;
+        // double check for producible
+        assert machine.checkViableOrder(o.order) : "Order is not producible";
         double start_time = current_time;
         double switch_time =
             prev_id >= 0 ? scheduler.getSwitchTime(prev_id, production_type_ID)
                 : 0;
-        double end_time = start_time + switch_time + (int) Math.ceil(
-            (double) o.order.quantity / machine.getProductionPace(
-                production_type_ID));
+        // NOTE: end time is rounded up to the next integer
+        double end_time = Math.ceil(start_time + switch_time
+            + (double) o.order.quantity / machine.getProductionPace(
+            production_type_ID));
         o.setStartEndTime(start_time, end_time);
 
         current_time = end_time;
@@ -282,7 +292,7 @@ public class Schedule implements Comparable<Schedule>,
    * Helper class for Orders
    *   NOTE: if memory size is not big issue, we can extend Order class
    *         for memory efficiency, we use composition by reference
-   *   XXX: Current start end time for Order is int
+   *   XXX: All the time variables in Order/OrderWithSchedule is in integer
    */
 
   public static class OrderWithSchedule {
@@ -405,8 +415,7 @@ public class Schedule implements Comparable<Schedule>,
     private double grade;
 
     private Grade(double grade, double on_time, double makespan,
-        double est_percentage,
-        double ldt_percentage) {
+        double est_percentage, double ldt_percentage) {
       this.grade = grade;
       on_time_percentage = on_time;
       makespan_percentage = makespan;
@@ -415,11 +424,10 @@ public class Schedule implements Comparable<Schedule>,
     }
 
     private void calcGradeByWeights(int on_time_weight, int makespan_weight,
-        int est_weight,
-        int ldt_weight) {
+        int est_weight, int ldt_weight) {
       grade = on_time_percentage * on_time_weight
-          + makespan_percentage * makespan_weight
-          + est_percentage * est_weight + ldt_percentage * ldt_weight;
+          + makespan_percentage * makespan_weight + est_percentage * est_weight
+          + ldt_percentage * ldt_weight;
     }
 
     @Override
@@ -427,10 +435,9 @@ public class Schedule implements Comparable<Schedule>,
       DecimalFormat df = new DecimalFormat("0.000");
       return "Grade{" + "grade: " + df.format(grade) + ", on_time=" + df.format(
           on_time_percentage * 100) + "%, makespan(2-best%)=" + df.format(
-          makespan_percentage * 100)
-          + "%, earliest=" + df.format(est_percentage * 100) + "%, latest="
-          + df.format(
-          ldt_percentage * 100) + "%}";
+          makespan_percentage * 100) + "%, earliest=" + df.format(
+          est_percentage * 100) + "%, latest=" + df.format(ldt_percentage * 100)
+          + "%}";
     }
 
     public double getGrade() {

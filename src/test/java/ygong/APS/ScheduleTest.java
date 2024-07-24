@@ -125,8 +125,8 @@ class ScheduleTest {
       }
       jump_matrix.add(row);
     }
-    this.scheduler.init(3, 2, 20, 40, 1.1, 0.60, new ArrayList<Machine>(2),
-        new ArrayList<Order>(20), jump_matrix);
+    this.scheduler.init(3, 2, 20, 40, 1.1, 0.60, new ArrayList<>(2),
+        new ArrayList<>(20), jump_matrix);
 
     Schedule schedule1 = new Schedule(schedule);
     schedule1.getMachine(0).scheduleAllOrders(this.scheduler);
@@ -173,7 +173,7 @@ class ScheduleTest {
   @Test
   void testGetMaxMakespan() {
     // empty schedule
-    Schedule schedule1 = new Schedule(new ArrayList<Machine>());
+    Schedule schedule1 = new Schedule(new ArrayList<>());
     AssertionError e = assertThrows(AssertionError.class,
         schedule1::getMaxMakespan);
     assertEquals("Machine list is empty", e.getMessage());
@@ -184,7 +184,7 @@ class ScheduleTest {
     AssertionError e2 = assertThrows(AssertionError.class,
         schedule1::getMaxMakespan);
     assertEquals("All machines are empty", e2.getMessage());
-    assertTrue(schedule1.getMachine(1).addOrder(orders.get(0)));
+    assertTrue(schedule1.getMachine(1).addOrder(orders.getFirst()));
     schedule1.getMachine(1).scheduleAllOrders();
     assertEquals(1.0, schedule1.getMaxMakespan());
 
