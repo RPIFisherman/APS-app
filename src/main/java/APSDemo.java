@@ -50,7 +50,6 @@ public class APSDemo extends Application {
              est_violate(% of product), violate the earliest start time
              ldt_violate(% of product), violate the latest due time
       */
-      scheduler.scheduleAllOrders();
       scheduler.calcAllSchedulesGrade(weights[0], weights[1], weights[2],
           weights[3]);
       endTime = System.nanoTime();
@@ -113,6 +112,8 @@ public class APSDemo extends Application {
           "Heap Memory Usage: " + heapMemoryUsage.getUsed() / 1024 / 1024
               + "MB");
     });
+
+    stage.close();
   }
 
   private void showWeightInputWindow(Stage stage,
@@ -152,15 +153,16 @@ public class APSDemo extends Application {
     stage.setTitle("Set Weights");
     stage.show();
 
-    submit_button.setOnAction(e -> {
-      submit_button.setDisable(true);
-      int on_time = Integer.parseInt(on_time_field.getText());
-      int makespan = Integer.parseInt(makespan_field.getText());
-      int est_violate = Integer.parseInt(est_violate_field.getText());
-      int ldt_violate = Integer.parseInt(ldt_violate_field.getText());
-
-      int[] weights = {on_time, makespan, est_violate, ldt_violate};
-      onWeightsSubmitted.accept(weights);
-    });
+    // submit_button.setOnAction(e -> {
+    //   submit_button.setDisable(true);
+    //   int on_time = Integer.parseInt(on_time_field.getText());
+    //   int makespan = Integer.parseInt(makespan_field.getText());
+    //   int est_violate = Integer.parseInt(est_violate_field.getText());
+    //   int ldt_violate = Integer.parseInt(ldt_violate_field.getText());
+    //
+    //   int[] weights = {on_time, makespan, est_violate, ldt_violate};
+    // });
+    int[] weights = {40, 30, 10, 10};
+    onWeightsSubmitted.accept(weights);
   }
 }

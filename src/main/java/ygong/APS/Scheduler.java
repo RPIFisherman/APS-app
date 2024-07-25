@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -27,6 +26,7 @@ public class Scheduler {
 
   private final List<Schedule> _schedules = new ArrayList<>();
   private final ArrayList<Future<Double>> _futures = new ArrayList<>();
+  private ExecutorService _executor;
   private int _num_threads = -1;
   private int _num_production_types = -1;
   private int _num_machines = -1;
@@ -60,7 +60,7 @@ public class Scheduler {
       Schedule new_schedule = new Schedule(schedule);
       _schedules.add(new_schedule);
       // TODO: add a new thread to schedule all orders in current schedule
-      //  _futures.add(_executor.submit(new scheduleOrder(new_schedule, this)));
+      _futures.add(_executor.submit(new scheduleOrder(new_schedule, this)));
       return;
     }
     for (int i = 0; i < _num_machines; i++) {
@@ -95,23 +95,20 @@ public class Scheduler {
   public void generateAllPossible() {
     // BAB with DFS to generate all possible schedules
     _schedules.clear();
-    ExecutorService _executor = Executors.newFixedThreadPool(_num_threads);
+    _executor = Executors.newFixedThreadPool(_num_threads);
     _futures.clear();
 
     depthFirstSearch(0, new Schedule(_machines));
-    /*
-     ??? Maybe wait until needed(calc grades) to get the result
-     TODO: wait for all threads to finish
-           for (Future<Double> future : _futures) {
-             try {
-               _min_makespan = Math.min(_min_makespan, future.get().intValue());
-             } catch (InterruptedException | ExecutionException e) {
-               System.err.println(e.getMessage());
-             }
-           }
-           _executor.shutdown();
-           _futures.clear();
-    */
+    // ??? Maybe wait until needed(calc grades) to get the result
+    for (Future<Double> future : _futures) {
+      try {
+        _min_makespan = Math.min(_min_makespan, future.get().intValue());
+      } catch (InterruptedException | ExecutionException e) {
+        System.err.println(e.getMessage());
+      }
+    }
+    _executor.shutdown();
+    _futures.clear();
 
   }
 
@@ -352,7 +349,7 @@ public class Scheduler {
     _schedules.parallelStream().forEach(s -> s.scheduleAllOrders(this));
   }
 
-  /* TODO: add a new thread to schedule all orders in current schedule
+  // TODO: add a new thread to schedule all orders in current schedule
   private static class scheduleOrder implements Callable<Double> {
 
     private final Schedule _schedule;
@@ -369,5 +366,4 @@ public class Scheduler {
       return _schedule.getMaxMakespan();
     }
   }
-  */
 }
