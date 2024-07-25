@@ -23,7 +23,10 @@ public class Schedule implements Comparable<Schedule>,
 
   public Schedule(Schedule s) {
     _machines = new ArrayList<>(s._machines.size());
-    s._machines.forEach(m -> _machines.add(new MachineWithOrders(m)));
+    // s._machines.forEach(m -> _machines.add(new MachineWithOrders(m)));
+    for (MachineWithOrders m : s._machines) {
+      _machines.add(new MachineWithOrders(m));
+    }
     if (s._grade == null) {
       _grade = null;
     } else {
@@ -53,7 +56,7 @@ public class Schedule implements Comparable<Schedule>,
     */
     double max = 0;
     for (MachineWithOrders m : _machines) {
-      LinkedHashSet<OrderWithSchedule> o = m.orders;
+      ArrayList<OrderWithSchedule> o = m.orders;
       if (o.isEmpty()) {
         continue;
       }
@@ -92,6 +95,9 @@ public class Schedule implements Comparable<Schedule>,
       */
       makespan = Math.max(makespan, m.orders.getLast()._end_time);
     }
+    // IMPORTANT: We change to percentage of good orders
+    ldt = num_orders-ldt;
+    est = num_orders-est;
     on_time /= num_orders;
     makespan = 2 - makespan / min_makespan;
     est /= num_orders;
@@ -170,19 +176,22 @@ public class Schedule implements Comparable<Schedule>,
   public static class MachineWithOrders implements Iterable<OrderWithSchedule> {
 
     protected final Machine machine;
-    private final LinkedHashSet<OrderWithSchedule> orders;
-    double _approx_run_time = 0;
+    // private final LinkedHashSet<OrderWithSchedule> orders;
+    private final ArrayList<OrderWithSchedule> orders;
+    protected double _approx_run_time = 0;
 
     public MachineWithOrders(Machine machine) {
       this.machine = machine;
-      this.orders = new LinkedHashSet<>();
+      this.orders = new ArrayList<>();
     }
 
     public MachineWithOrders(MachineWithOrders machine) {
       this.machine = machine.machine;
-      this.orders = new LinkedHashSet<>(machine.orders.size());
-      machine.orders.parallelStream()
-          .forEachOrdered(o -> this.orders.add(new OrderWithSchedule(o)));
+      this.orders = new ArrayList<>(machine.orders.size());
+      // machine.orders.forEach(o -> this.orders.add(new OrderWithSchedule(o)));
+      for (OrderWithSchedule o : machine.orders) {
+        this.orders.add(new OrderWithSchedule(o));
+      }
       this._approx_run_time = machine._approx_run_time;
     }
 

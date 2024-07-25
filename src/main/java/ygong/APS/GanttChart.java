@@ -7,22 +7,33 @@ import javafx.beans.NamedArg;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
-import javafx.scene.chart.*;
+import javafx.scene.chart.Axis;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.ValueAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Rectangle;
 
+/**
+ * This GanttChart class is borrowed from
+ * <a href="https://stackoverflow.com/questions/27975898/gantt-chart-from-scratch">...</a>
+ *
+ * @param <X> X axis type
+ * @param <Y> Y axis type
+ */
 public class GanttChart<X, Y> extends XYChart<X, Y> {
 
   private double blockHeight = 10;
 
   public GanttChart(@NamedArg("xAxis") Axis<X> xAxis,
-                    @NamedArg("yAxis") Axis<Y> yAxis) {
+      @NamedArg("yAxis") Axis<Y> yAxis) {
     this(xAxis, yAxis, FXCollections.observableArrayList());
   }
 
   public GanttChart(@NamedArg("xAxis") Axis<X> xAxis,
-                    @NamedArg("yAxis") Axis<Y> yAxis,
-                    @NamedArg("data") ObservableList<Series<X, Y>> data) {
+      @NamedArg("yAxis") Axis<Y> yAxis,
+      @NamedArg("data") ObservableList<Series<X, Y>> data) {
     super(xAxis, yAxis);
     if (!(xAxis instanceof ValueAxis && yAxis instanceof CategoryAxis)) {
       throw new IllegalArgumentException(
@@ -32,11 +43,11 @@ public class GanttChart<X, Y> extends XYChart<X, Y> {
   }
 
   private static String getStyleClass(Object obj) {
-    return ((ExtraData)obj).getStyleClass();
+    return ((ExtraData) obj).getStyleClass();
   }
 
   private static double getLength(Object obj) {
-    return ((ExtraData)obj).getLength();
+    return ((ExtraData) obj).getLength();
   }
 
   @Override
@@ -58,25 +69,25 @@ public class GanttChart<X, Y> extends XYChart<X, Y> {
         Rectangle ellipse;
         if (block != null) {
           if (block instanceof StackPane) {
-            StackPane region = (StackPane)item.getNode();
+            StackPane region = (StackPane) item.getNode();
             if (region.getShape() == null) {
               ellipse = new Rectangle(getLength(item.getExtraValue()),
-                                      getBlockHeight());
+                  getBlockHeight());
             } else if (region.getShape() instanceof Rectangle) {
-              ellipse = (Rectangle)region.getShape();
+              ellipse = (Rectangle) region.getShape();
             } else {
               return;
             }
             ellipse.setWidth(
                 getLength(item.getExtraValue()) *
-                ((getXAxis() instanceof NumberAxis)
-                     ? Math.abs(((NumberAxis)getXAxis()).getScale())
-                     : 1));
+                    ((getXAxis() instanceof NumberAxis)
+                        ? Math.abs(((NumberAxis) getXAxis()).getScale())
+                        : 1));
             ellipse.setHeight(
                 getBlockHeight() *
-                ((getYAxis() instanceof NumberAxis)
-                     ? Math.abs(((NumberAxis)getYAxis()).getScale())
-                     : 1));
+                    ((getYAxis() instanceof NumberAxis)
+                        ? Math.abs(((NumberAxis) getYAxis()).getScale())
+                        : 1));
             y -= getBlockHeight() / 2.0;
 
             // Note: workaround for RT-7689 - saw this in ProgressControlSkin
@@ -98,7 +109,9 @@ public class GanttChart<X, Y> extends XYChart<X, Y> {
     }
   }
 
-  public double getBlockHeight() { return blockHeight; }
+  public double getBlockHeight() {
+    return blockHeight;
+  }
 
   public void setBlockHeight(double blockHeight) {
     this.blockHeight = blockHeight;
@@ -106,7 +119,7 @@ public class GanttChart<X, Y> extends XYChart<X, Y> {
 
   @Override
   protected void dataItemAdded(Series<X, Y> series, int itemIndex,
-                               Data<X, Y> item) {
+      Data<X, Y> item) {
     Node block =
         createContainer(series, getData().indexOf(series), item, itemIndex);
     getPlotChildren().add(block);
@@ -114,14 +127,15 @@ public class GanttChart<X, Y> extends XYChart<X, Y> {
 
   @Override
   protected void dataItemRemoved(final Data<X, Y> item,
-                                 final Series<X, Y> series) {
+      final Series<X, Y> series) {
     final Node block = item.getNode();
     getPlotChildren().remove(block);
     removeDataItemFromDisplay(series, item);
   }
 
   @Override
-  protected void dataItemChanged(Data<X, Y> item) {}
+  protected void dataItemChanged(Data<X, Y> item) {
+  }
 
   @Override
   protected void seriesAdded(Series<X, Y> series, int seriesIndex) {
@@ -142,7 +156,7 @@ public class GanttChart<X, Y> extends XYChart<X, Y> {
   }
 
   private Node createContainer(Series<X, Y> series, int seriesIndex,
-                               final Data<X, Y> item, int itemIndex) {
+      final Data<X, Y> item, int itemIndex) {
 
     Node container = item.getNode();
 
@@ -174,7 +188,7 @@ public class GanttChart<X, Y> extends XYChart<X, Y> {
           if (xData != null) {
             xData.add(data.getXValue());
             xData.add(xa.toRealValue(xa.toNumericValue(data.getXValue()) +
-                                     getLength(data.getExtraValue())));
+                getLength(data.getExtraValue())));
           }
           if (yData != null) {
             yData.add(data.getYValue());
@@ -201,11 +215,17 @@ public class GanttChart<X, Y> extends XYChart<X, Y> {
       this.styleClass = styleClass;
     }
 
-    public double getLength() { return length; }
+    public double getLength() {
+      return length;
+    }
 
-    public void setLength(double length) { this.length = length; }
+    public void setLength(double length) {
+      this.length = length;
+    }
 
-    public String getStyleClass() { return styleClass; }
+    public String getStyleClass() {
+      return styleClass;
+    }
 
     public void setStyleClass(String styleClass) {
       this.styleClass = styleClass;

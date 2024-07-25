@@ -1,6 +1,5 @@
 package ygong.APS;
 
-import static java.nio.file.Files.write;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -46,13 +45,9 @@ class SchedulerTest {
 
   @Test
   void initTest() {
-    assertThrows(AssertionError.class, () -> {
-      scheduler = new Scheduler(-1);
-    });
+    assertThrows(AssertionError.class, () -> scheduler = new Scheduler(-1));
 
-    assertThrows(AssertionError.class, () -> {
-      scheduler = new Scheduler(0);
-    });
+    assertThrows(AssertionError.class, () -> scheduler = new Scheduler(0));
 
     scheduler = new Scheduler(1);
   }
@@ -144,10 +139,10 @@ class SchedulerTest {
       scheduler.initRandom(num_order_types, num_machines, num_orders, max_hours,
           max_capacity, min_capacity, seed);
       scheduler.generateAllPossible();
-      ArrayList<Schedule> schedules = scheduler.getSchedules();
-      assertEquals(524, schedules.size());
 
       scheduler.calcAllSchedulesGrade();
+      ArrayList<Schedule> schedules = scheduler.getSchedules();
+      assertEquals(524, schedules.size());
       GanttChart<Number, String> chart = scheduler.createChart(0);
       assertNotNull(chart);
 

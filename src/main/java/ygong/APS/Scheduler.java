@@ -25,10 +25,9 @@ import ygong.APS.Schedule.OrderWithSchedule;
 
 public class Scheduler {
 
-  private final List<Schedule> _schedules = new CopyOnWriteArrayList<>();
+  private final List<Schedule> _schedules = new ArrayList<>();
   private final ArrayList<Future<Double>> _futures = new ArrayList<>();
   private int _num_threads = -1;
-  private ExecutorService _executor;
   private int _num_production_types = -1;
   private int _num_machines = -1;
   private int _num_orders = -1;
@@ -60,8 +59,8 @@ public class Scheduler {
       }
       Schedule new_schedule = new Schedule(schedule);
       _schedules.add(new_schedule);
-      // add a new thread to schedule all orders in current schedule
-      _futures.add(_executor.submit(new scheduleOrder(new_schedule, this)));
+      // TODO: add a new thread to schedule all orders in current schedule
+      //  _futures.add(_executor.submit(new scheduleOrder(new_schedule, this)));
       return;
     }
     for (int i = 0; i < _num_machines; i++) {
@@ -88,29 +87,32 @@ public class Scheduler {
     this._max_hours_allowed = max_hours_allowed;
     this._max_capacity_per_machine = max_capacity_per_machine;
     this._min_capacity_per_machine = min_capacity_per_machine;
+    this._machines = machines;
+    this._orders = orders;
     this._order_type_switch_times = order_type_switch_times;
-    // TODO Not implemented correctly
   }
 
   public void generateAllPossible() {
     // BAB with DFS to generate all possible schedules
     _schedules.clear();
-    _executor = Executors.newFixedThreadPool(_num_threads);
+    ExecutorService _executor = Executors.newFixedThreadPool(_num_threads);
     _futures.clear();
 
     depthFirstSearch(0, new Schedule(_machines));
-    // ??? Maybe wait until needed(calc grades) to get the result
+    /*
+     ??? Maybe wait until needed(calc grades) to get the result
+     TODO: wait for all threads to finish
+           for (Future<Double> future : _futures) {
+             try {
+               _min_makespan = Math.min(_min_makespan, future.get().intValue());
+             } catch (InterruptedException | ExecutionException e) {
+               System.err.println(e.getMessage());
+             }
+           }
+           _executor.shutdown();
+           _futures.clear();
+    */
 
-    // wait for all threads to finish
-    for (Future<Double> future : _futures) {
-      try {
-        _min_makespan = Math.min(_min_makespan, future.get().intValue());
-      } catch (InterruptedException | ExecutionException e) {
-        System.err.println(e.getMessage());
-      }
-    }
-    _executor.shutdown();
-    _futures.clear();
   }
 
   public void initRandom(final int num_order_types, final int num_machines,
@@ -339,13 +341,18 @@ public class Scheduler {
   public List<Schedule> getBestSchedule(int num) {
     if (num == 0) {
       return _schedules;
-    } else if(num > 0) {
+    } else if (num > 0) {
       return _schedules.subList(0, Math.min(num, _schedules.size()));
     } else {
       return _schedules.subList(_schedules.size() + num, _schedules.size());
     }
   }
 
+  public void scheduleAllOrders() {
+    _schedules.parallelStream().forEach(s -> s.scheduleAllOrders(this));
+  }
+
+  /* TODO: add a new thread to schedule all orders in current schedule
   private static class scheduleOrder implements Callable<Double> {
 
     private final Schedule _schedule;
@@ -362,4 +369,5 @@ public class Scheduler {
       return _schedule.getMaxMakespan();
     }
   }
+  */
 }
