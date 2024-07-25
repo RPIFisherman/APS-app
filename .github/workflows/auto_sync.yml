@@ -16,8 +16,8 @@ jobs:
         uses: Yikun/hub-mirror-action@master
         with:
           src: github/RPIFisherman
-          dst: gitee/RPIFisherman
-          dst_key: ${{ secrets.GITEE_PRIVATE_KEY }}
-          dst_token: ${{ secrets.GITEE_TOKEN }}
+          dst: gitee/yuyanggong
+          dst_key: ${{ secrets.GITEE_PRIVATE_KEY_CN }}
+          dst_token: ${{ secrets.GITEE_TOKEN_CN }}
           mappings: ".github=>github"
           force_update: true
