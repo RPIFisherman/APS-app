@@ -4,7 +4,6 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.Spliterator;
 
 // a helper class that works the same as List<Machine> with grades
@@ -18,7 +17,10 @@ public class Schedule implements Comparable<Schedule>,
 
   public Schedule(ArrayList<Machine> machines) {
     _machines = new ArrayList<>(machines.size());
-    machines.forEach(m -> _machines.add(new MachineWithOrders(m)));
+    // machines.forEach(m -> _machines.add(new MachineWithOrders(m)));
+    for (Machine m : machines) {
+      _machines.add(new MachineWithOrders(m));
+    }
   }
 
   public Schedule(Schedule s) {
@@ -93,11 +95,15 @@ public class Schedule implements Comparable<Schedule>,
        NOTE: getLast() is not supported in Java 8
              use stream().skip(<size>-1).findFirst() instead
       */
-      makespan = Math.max(makespan, m.orders.getLast()._end_time);
+      if (m.orders.isEmpty()) {
+        continue;
+      } else {
+        makespan = Math.max(makespan, m.orders.getLast()._end_time);
+      }
     }
     // IMPORTANT: We change to percentage of good orders
-    ldt = num_orders-ldt;
-    est = num_orders-est;
+    ldt = num_orders - ldt;
+    est = num_orders - est;
     on_time /= num_orders;
     makespan = 2 - makespan / min_makespan;
     est /= num_orders;

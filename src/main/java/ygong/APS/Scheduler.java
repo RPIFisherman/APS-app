@@ -70,7 +70,8 @@ public class Scheduler {
         return;
       }
       machine.addOrder(_orders.get(order_index));
-      depthFirstSearch(order_index + 1, new Schedule(schedule));
+      // depthFirstSearch(order_index + 1, new Schedule(schedule)); ???
+      depthFirstSearch(order_index + 1, schedule);
       machine.removeOrder(_orders.get(order_index));
     }
   }

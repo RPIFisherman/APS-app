@@ -19,6 +19,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import ygong.APS.Schedule;
+import ygong.APS.Schedule.MachineWithOrders;
 import ygong.APS.Scheduler;
 
 public class APSDemo extends Application {
@@ -76,13 +77,22 @@ public class APSDemo extends Application {
 
         // add a label
         Label label = new Label(schedule.toString());
+
+        System.out.println("Grade: " + grade);
+        for(MachineWithOrders m : schedule) {
+          for (ygong.APS.Schedule.OrderWithSchedule o : m) {
+            System.out.print(o.getOrderID() + " ");
+          }
+          System.out.println();
+        }
+        System.out.println();
+
         label.setFont(new javafx.scene.text.Font("Arial", 20));
         label.setWrapText(true);
         label.setMaxWidth(1000);
 
         VBox vbox = new VBox();
-        vbox.getChildren()
-            .addAll(label, scheduler.createChart(schedule));
+        vbox.getChildren().addAll(label, scheduler.createChart(schedule));
         vbox.setSpacing(50);
         vbox.setAlignment(javafx.geometry.Pos.CENTER);
 
@@ -112,8 +122,6 @@ public class APSDemo extends Application {
           "Heap Memory Usage: " + heapMemoryUsage.getUsed() / 1024 / 1024
               + "MB");
     });
-
-    stage.close();
   }
 
   private void showWeightInputWindow(Stage stage,
@@ -153,16 +161,15 @@ public class APSDemo extends Application {
     stage.setTitle("Set Weights");
     stage.show();
 
-    // submit_button.setOnAction(e -> {
-    //   submit_button.setDisable(true);
-    //   int on_time = Integer.parseInt(on_time_field.getText());
-    //   int makespan = Integer.parseInt(makespan_field.getText());
-    //   int est_violate = Integer.parseInt(est_violate_field.getText());
-    //   int ldt_violate = Integer.parseInt(ldt_violate_field.getText());
-    //
-    //   int[] weights = {on_time, makespan, est_violate, ldt_violate};
-    // });
-    int[] weights = {40, 30, 10, 10};
-    onWeightsSubmitted.accept(weights);
+    submit_button.setOnAction(e -> {
+      submit_button.setDisable(true);
+      int on_time = Integer.parseInt(on_time_field.getText());
+      int makespan = Integer.parseInt(makespan_field.getText());
+      int est_violate = Integer.parseInt(est_violate_field.getText());
+      int ldt_violate = Integer.parseInt(ldt_violate_field.getText());
+
+      int[] weights = {on_time, makespan, est_violate, ldt_violate};
+      onWeightsSubmitted.accept(weights);
+    });
   }
 }
