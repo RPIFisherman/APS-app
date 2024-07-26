@@ -47,9 +47,9 @@ class MachineTest {
   @Test
   void checkViableOrder() {
     Order order = new Order("order1", 1, 10, 1, 0, 10, 20);
-    assertTrue(machine.checkViableOrder(order));
+    assertTrue(machine.checkViableOrder(order.production_type_ID));
     order = new Order("order2", 3, 10, 5, 0, 10, 20);
-    assertFalse(machine.checkViableOrder(order));
+    assertFalse(machine.checkViableOrder(order.production_type_ID));
   }
 
   @Test

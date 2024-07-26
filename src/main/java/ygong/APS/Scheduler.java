@@ -44,7 +44,8 @@ public class Scheduler {
   }
 
   public Scheduler(int num_threads) {
-    assert num_threads > 0 : _num_threads = num_threads;
+    assert num_threads > 0 : "Threads should be greater than zero!";
+    _num_threads = num_threads;
   }
 
   private void depthFirstSearch(final int order_index, Schedule schedule)
@@ -346,9 +347,6 @@ public class Scheduler {
     }
   }
 
-  public void scheduleAllOrders() {
-    _schedules.parallelStream().forEach(s -> s.scheduleAllOrders(this));
-  }
 
   // TODO: add a new thread to schedule all orders in current schedule
   private static class scheduleOrder implements Callable<Double> {

@@ -146,9 +146,22 @@ public class Schedule implements Comparable<Schedule>,
   @Override
   public String toString() {
     DecimalFormat df = new DecimalFormat("0.000");
-    return "Schedule{" + "grade=" + df.format(getGrade()) + ", machines="
-        + _machines.size() + (_grade == null ? "" : ", " + _grade.toString())
-        + '}';
+    // return "Schedule{" + "grade=" + df.format(getGrade()) + ", machines="
+    //     + _machines.size() + (_grade == null ? "" : ", " + _grade.toString())
+    //     + '}';
+    StringBuilder s = new StringBuilder();
+    for (MachineWithOrders m : _machines) {
+      s.append(m.getName()).append(": ");
+      for (OrderWithSchedule o : m) {
+        s.append(o.getOrderID()).append(" ");
+      }
+      s.append("| ");
+    }
+    s.append("\nSchedule{" + "grade=").append(df.format(getGrade()))
+        .append(", machines=").append(_machines.size())
+        .append(_grade == null ? "" : ", " + _grade.toString()).append('}');
+
+    return s.toString();
   }
 
   @Override
@@ -212,7 +225,7 @@ public class Schedule implements Comparable<Schedule>,
      */
     protected boolean addOrder(Order o) {
       // check if producible
-      if (machine.checkViableOrder(o)) {
+      if (machine.checkViableOrder(o.production_type_ID)) {
         boolean add = orders.add(new OrderWithSchedule(o));
         if (add) {
           _approx_run_time += (double) o.quantity / machine.getProductionPace(
@@ -242,8 +255,8 @@ public class Schedule implements Comparable<Schedule>,
       int prev_id = -1;
       for (OrderWithSchedule o : orders) {
         int production_type_ID = o.order.production_type_ID;
-        // double check for producible
-        assert machine.checkViableOrder(o.order) : "Order is not producible";
+        // double check for producible NOTE: remove assertion for performance
+        assert machine.checkViableOrder(o.order.production_type_ID) : "Order is not producible";
         double start_time = current_time;
         double switch_time =
             prev_id >= 0 ? scheduler.getSwitchTime(prev_id, production_type_ID)

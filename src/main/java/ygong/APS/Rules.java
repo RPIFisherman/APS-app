@@ -16,11 +16,11 @@ public enum Rules {
 
   // * during the setting
   public static boolean orderFitsMachine(MachineWithOrders machine, OrderWithSchedule order) {
-    return machine.machine.checkViableOrder(order.order);
+    return machine.machine.checkViableOrder(order.order.production_type_ID);
   }
 
   public static boolean orderFitsMachine(MachineWithOrders machine, Order order) {
-    return machine.machine.checkViableOrder(order);
+    return machine.machine.checkViableOrder(order.production_type_ID);
   }
 
   // * can be checked during and after the setting

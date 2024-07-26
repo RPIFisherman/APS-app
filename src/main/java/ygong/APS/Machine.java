@@ -21,14 +21,15 @@ public class Machine {
     this.products_pace_per_hour = new HashMap<>(machine.products_pace_per_hour);
   }
 
-  public boolean checkViableOrder(Order order) {
-    return products_pace_per_hour.get(order.production_type_ID) != null &&
-        products_pace_per_hour.get(order.production_type_ID) > 0;
+  public boolean checkViableOrder(int production_type_ID) {
+    // return products_pace_per_hour.containsKey(production_type_ID) &&
+    Object o = products_pace_per_hour.get(production_type_ID);
+    return o != null && (int)o > 0;
   }
 
   public int getProductionPace(int production_type_id) {
-    return products_pace_per_hour.get(production_type_id) == null ?
-           -1 : products_pace_per_hour.get(production_type_id);
+    Object o = products_pace_per_hour.get(production_type_id);
+    return o == null ? -1 : (int)o;
   }
 
   // public void addOrder(Order order) {

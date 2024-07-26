@@ -78,7 +78,8 @@ class ScheduleTest {
         schedule1.getMachine(1).getMachineID());
 
     assertTrue(schedule1.getMachine(0).addOrder(orders.get(1)));
-    assertFalse(schedule1.getMachine(0).addOrder(orders.get(1)));
+    // IMPORTANT: change to arraylist, so can add same order to any machine
+    // assertFalse(schedule1.getMachine(0).addOrder(orders.get(1)));
     assertNotEquals(schedule.getMachine(0).iterator(),
         schedule1.getMachine(0).iterator());
     assertTrue(schedule1.getMachine(0).removeOrder(orders.get(1)));

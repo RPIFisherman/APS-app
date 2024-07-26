@@ -31,8 +31,9 @@ public class APSDemo extends Application {
   @Override
   public void start(Stage stage) {
     showWeightInputWindow(stage, weights -> {
-      Scheduler scheduler = new Scheduler();
-      scheduler.initRandom(3, 2, 20, 40, 1.3, 0.50, 1337);
+      Scheduler scheduler = new Scheduler(2);
+      scheduler.initRandom(3, 2, 26, 40, 1.25, 0.77, 1337);
+      // scheduler.initRandom(3, 2, 4, 40, 2, 0.0, 1337);
       long startTime = System.nanoTime();
       scheduler.generateAllPossible();
       long endTime = System.nanoTime();
@@ -58,15 +59,15 @@ public class APSDemo extends Application {
       System.out.println("Time elapsed for update all possible schedules: "
           + (endTime - startTime) / 1000000 + "ms");
 
-      final int PRINT_NUM = 10;
+      int PRINT_NUM = 10;
       System.out.println(schedules.size());
       if (schedules.size() < PRINT_NUM) {
-        return;
+        PRINT_NUM = schedules.size();
       }
 
       // plot in different tabs
       TabPane tabPane = new TabPane();
-      // print out the best 3 schedules by grade
+      // print out the best 103 schedules by grade
       schedules = scheduler.getBestSchedule(PRINT_NUM);
       DecimalFormat df = new DecimalFormat("0.000");
       for (int i = 0; i < PRINT_NUM; i++) {
@@ -135,22 +136,22 @@ public class APSDemo extends Application {
 
     Label on_time_label = new Label("On Time (%):");
     grid.add(on_time_label, 0, 1);
-    TextField on_time_field = new TextField("40");
+    TextField on_time_field = new TextField("100");
     grid.add(on_time_field, 1, 1);
 
     Label makespan_label = new Label("Makespan (%):");
     grid.add(makespan_label, 0, 2);
-    TextField makespan_field = new TextField("30");
+    TextField makespan_field = new TextField("100");
     grid.add(makespan_field, 1, 2);
 
     Label est_violate_label = new Label("EST Violate (%):");
     grid.add(est_violate_label, 0, 3);
-    TextField est_violate_field = new TextField("10");
+    TextField est_violate_field = new TextField("100");
     grid.add(est_violate_field, 1, 3);
 
     Label ldt_violate_label = new Label("LDT Violate (%):");
     grid.add(ldt_violate_label, 0, 4);
-    TextField ldt_violate_field = new TextField("10");
+    TextField ldt_violate_field = new TextField("100");
     grid.add(ldt_violate_field, 1, 4);
 
     Button submit_button = new Button("Submit");
