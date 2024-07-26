@@ -66,9 +66,12 @@ public class Scheduler {
     }
     for (int i = 0; i < _num_machines; i++) {
       MachineWithOrders machine = schedule.getMachine(i);
-      if (aboveCapacity(machine, _max_hours_allowed * _max_capacity_per_machine)
-          || !orderFitsMachine(machine, _orders.get(order_index))) {
+      if (aboveCapacity(machine,
+          _max_hours_allowed * _max_capacity_per_machine)) {
         return;
+      }
+      if (!orderFitsMachine(machine, _orders.get(order_index))) {
+        continue;
       }
       machine.addOrder(_orders.get(order_index));
       // depthFirstSearch(order_index + 1, new Schedule(schedule)); ???
@@ -310,7 +313,14 @@ public class Scheduler {
     return chart;
   }
 
-  public double getSwitchTime(int i, int j) {
+  /**
+   * @param i the order type of the first order
+   * @param j the order type of the second order
+   * @return the switch time from order type i to order type j
+   *
+   * @throws IndexOutOfBoundsException if i or j is out of bound
+   */
+  protected double getSwitchTime(int i, int j) {
     return _order_type_switch_times.get(i).get(j);
   }
 
