@@ -23,42 +23,14 @@ public class Machine {
 
   public boolean checkViableOrder(int production_type_ID) {
     // return products_pace_per_hour.containsKey(production_type_ID) &&
-    Object o = products_pace_per_hour.get(production_type_ID);
-    return o != null && (int)o > 0;
+    Integer o = products_pace_per_hour.get(production_type_ID);
+    return o != null && o > 0;
   }
 
   public int getProductionPace(int production_type_id) {
-    Object o = products_pace_per_hour.get(production_type_id);
-    return o == null ? -1 : (int)o;
+    Integer o = products_pace_per_hour.get(production_type_id);
+    return o == null ? -1 : o;
   }
-
-  // public void addOrder(Order order) {
-  //   _approx_run_time +=
-  //       (int)Math.ceil((double)order.getQuantity() /
-  //                      products_pace_per_hour.get(order
-  //                      .getProductionTypeId()));
-  //   _orders.add(order);
-  // }
-  //
-  // public void removeOrder(Order order) {
-  //   _approx_run_time -=
-  //       (int)Math.ceil((double)order.getQuantity() /
-  //                      products_pace_per_hour.get(order
-  //                      .getProductionTypeId()));
-  //   _orders.remove(order);
-  // }
-  //
-  // public LinkedHashSet<Order> getOrders() { return _orders; }
-  //
-  // public boolean aboveCapacity(final int hours_allowed,
-  //                              final double upper_percentage) {
-  //   return _approx_run_time > hours_allowed * upper_percentage;
-  // }
-  //
-  // public boolean belowCapacity(final int hours_allowed,
-  //                              final double lower_percentage) {
-  //   return _approx_run_time < hours_allowed * lower_percentage;
-  // }
 
   @Override
   public String toString() {
