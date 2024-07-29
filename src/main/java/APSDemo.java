@@ -1,5 +1,3 @@
-package ygong.APSDemo;
-
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
@@ -25,12 +23,38 @@ import ygong.APS.Schedule.MachineWithOrders;
 import ygong.APS.Schedule.OrderWithTime;
 import ygong.APS.Scheduler;
 
+/**
+ * A demo application for the APS project
+ * <p>
+ *   This application demonstrates the APS project by generating random data and
+ *   calculating the best schedules based on the given weights.
+ *   The user can input the weights for the grade calculation in the GUI.
+ *   The application will then display the best schedules in a tabbed window.
+ *   The user can see the grade of each schedule and the order of each machine
+ *   in the schedule.
+ *   The application also displays a chart for the best schedules.
+ * </p>
+ *   Feel free to modify the weights and the random data generation in the
+ *   {@link #start(Stage)} method to see different results. Have fun!
+ *
+ * @author <a href="mailto:yuyanggong.rpi@gmail.com"> Yuyang Gong</a>
+ * @version 1.0
+ */
 public class APSDemo extends Application {
 
+  /**
+   * The main method for the ygong.APSDemo application
+   *
+   * @param args the command line arguments, not used in this application
+   */
   public static void main(String[] args) {
     launch(args);
   }
 
+  /**
+   * The main demo method for the ygong.APSDemo application
+   * @param stage the primary stage for this application
+   */
   @Override
   public void start(Stage stage) {
     showWeightInputWindow(stage, weights -> {
@@ -39,9 +63,8 @@ public class APSDemo extends Application {
 
       // Init random data
       // scheduler.initRandom(3, 2, 20, 40, 1.25, 0.8, 1337);
-      // scheduler.initRandom(3, 2, 20, 40, 1, 0.0,1337);
       // NOTE:need -Xmx8g for following test, takes a loooooong time
-      scheduler.initRandom(3, 3, 30, 40, 1.05, 1.0, 1337);
+      // scheduler.initRandom(3, 3, 30, 40, 1.05, 1.0, 1337);
 
       long startTime = System.nanoTime();
 
