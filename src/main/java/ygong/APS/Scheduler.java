@@ -20,14 +20,24 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.paint.Color;
 import ygong.APS.Schedule.MachineWithOrders;
-import ygong.APS.Schedule.OrderWithSchedule;
+import ygong.APS.Schedule.OrderWithTime;
 
+/**
+ * The Scheduler class is used to generate all possible schedules and calculate
+ * the grade for each schedule based on the weights given.
+ * <p>
+ * The Scheduler class can be used to generate all possible schedules and
+ * calculate the grade for each schedule based on the weights given. The
+ * Scheduler class can also be used to generate random schedules based on the
+ * given parameters.
+ * <p>
+ */
 public class Scheduler {
 
   private final List<Schedule> _schedules = new ArrayList<>();
   private final ArrayList<Future<Double>> _futures = new ArrayList<>();
+  private final int _num_threads;
   private ExecutorService _executor;
-  private int _num_threads = -1;
   private int _num_production_types = -1;
   private int _num_machines = -1;
   private int _num_orders = -1;
@@ -54,27 +64,32 @@ public class Scheduler {
     assert order_index <= _num_orders;
     if (order_index == _num_orders) {
       for (MachineWithOrders m : schedule) {
-        if (belowCapacity(m, _max_hours_allowed * _min_capacity_per_machine)) {
+        if (belowCapacity(m)) {
           return;
         }
       }
       Schedule new_schedule = new Schedule(schedule);
       _schedules.add(new_schedule);
-      // TODO: add a new thread to schedule all orders in current schedule
       _futures.add(_executor.submit(new scheduleOrder(new_schedule, this)));
       return;
     }
     for (int i = 0; i < _num_machines; i++) {
       MachineWithOrders machine = schedule.getMachine(i);
-      if (aboveCapacity(machine,
-          _max_hours_allowed * _max_capacity_per_machine)) {
-        return;
-      }
+
+      // UNDONE remove the checker since the add will check viability
+      // if order does not fit machine, skip
       if (!orderFitsMachine(machine, _orders.get(order_index))) {
         continue;
       }
+
+      // add order
       machine.addOrder(_orders.get(order_index));
-      // depthFirstSearch(order_index + 1, new Schedule(schedule)); ???
+      // check viability UNDONE
+      if (aboveCapacity(machine)) {
+        return;
+      }
+
+      // depthFirstSearch(order_index + 1, new Schedule(schedule));
       depthFirstSearch(order_index + 1, schedule);
       machine.removeOrder(_orders.get(order_index));
     }
@@ -86,6 +101,16 @@ public class Scheduler {
       final double min_capacity_per_machine, final ArrayList<Machine> machines,
       final ArrayList<Order> orders,
       final ArrayList<ArrayList<Double>> order_type_switch_times) {
+    // assert validity
+    assert machines.size() == num_machines;
+    assert orders.size() == num_orders;
+    assert order_type_switch_times.size() == num_order_types;
+    for (ArrayList<Double> o : order_type_switch_times) {
+      assert o.size() == num_order_types;
+    }
+    Rules.capacityLowerBound = _max_hours_allowed * _min_capacity_per_machine;
+    Rules.capacityUpperBound = _max_hours_allowed * _max_capacity_per_machine;
+
     this._num_machines = num_machines;
     this._num_production_types = num_order_types;
     this._num_orders = num_orders;
@@ -137,13 +162,13 @@ public class Scheduler {
     assert min_capacity_per_machine >= 0;
     assert max_capacity_per_machine > min_capacity_per_machine;
     final int ORDER_QUANTITY_GRANULARITY = 5;
-    final int PRODUCT_PACE_GRANULARITY = 10;
+    final int PRODUCT_PACE_GRANULARITY = 2;
     final int PRODUCT_PACE_MIN = 10;
-    final int PRODUCT_PACE_MAX = 11;
+    final int PRODUCT_PACE_MAX = 21;
     final int MIN_ORDER_QUANTITY = 50;
     final int MAX_ORDER_QUANTITY = 100;
     final double MIN_ORDER_TYPE_SWITCH_TIME = 0.0;
-    final double MAX_ORDER_TYPE_SWITCH_TIME = 0.5;
+    final double MAX_ORDER_TYPE_SWITCH_TIME = 1.0;
     final int MIN_EARLIEST_START_TIME = 0;
     final int MAX_EARLIEST_START_TIME = 10;
     final int MIN_LATEST_DUE_TIME = 20;
@@ -156,6 +181,8 @@ public class Scheduler {
     _max_hours_allowed = max_hours_allowed;
     _max_capacity_per_machine = max_capacity_per_machine;
     _min_capacity_per_machine = min_capacity_per_machine;
+    Rules.capacityLowerBound = _max_hours_allowed * _min_capacity_per_machine;
+    Rules.capacityUpperBound = _max_hours_allowed * _max_capacity_per_machine;
 
     // generate order types
     _num_production_types = num_order_types;
@@ -164,8 +191,9 @@ public class Scheduler {
     _num_orders = num_orders;
     _orders = new ArrayList<>(_num_orders);
     for (int i = 0; i < _num_orders; i++) {
-      int quantity = (random.nextInt((MAX_ORDER_QUANTITY - MIN_ORDER_QUANTITY)
-          / ORDER_QUANTITY_GRANULARITY) + 1) * ORDER_QUANTITY_GRANULARITY;
+      int quantity = (random.nextInt(MAX_ORDER_QUANTITY - MIN_ORDER_QUANTITY)
+          + MIN_ORDER_QUANTITY)
+          / ORDER_QUANTITY_GRANULARITY * ORDER_QUANTITY_GRANULARITY;
       int production_type_ID = random.nextInt(_num_production_types);
       int earliest_start_time =
           random.nextInt(MAX_EARLIEST_START_TIME - MIN_EARLIEST_START_TIME + 1)
@@ -287,7 +315,7 @@ public class Scheduler {
       XYChart.Series<Number, String> series = new XYChart.Series<>();
       int prev_order_ID = -1;
 
-      for (OrderWithSchedule order : machine) {
+      for (OrderWithTime order : machine) {
         int start_time = order.getStartTime();
         int end_time = order.getEndTime();
         series.getData().add(new XYChart.Data<>(start_time, machine.getName(),
@@ -317,7 +345,6 @@ public class Scheduler {
    * @param i the order type of the first order
    * @param j the order type of the second order
    * @return the switch time from order type i to order type j
-   *
    * @throws IndexOutOfBoundsException if i or j is out of bound
    */
   protected double getSwitchTime(int i, int j) {

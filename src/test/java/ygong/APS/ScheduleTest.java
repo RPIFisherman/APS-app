@@ -18,7 +18,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ygong.APS.Schedule.MachineWithOrders;
-import ygong.APS.Schedule.OrderWithSchedule;
+import ygong.APS.Schedule.OrderWithTime;
 
 class ScheduleTest {
 
@@ -96,7 +96,7 @@ class ScheduleTest {
     // set grade
     this.testStatsAndStatus();
     schedule2 = new Schedule(schedule);
-    assertEquals(1.0, schedule2.getGrade());
+    assertEquals(schedule.getGrade(), schedule2.getGrade());
     assertNotNull(schedule2.toString());
   }
 
@@ -110,13 +110,18 @@ class ScheduleTest {
 
     schedule.getMachine(0).scheduleAllOrders();
     schedule.getMachine(1).scheduleAllOrders();
-    // schedule.g
-    schedule.calcStat(8.0, 5);
-    assertEquals(8.0, schedule.getMaxMakespan());
-    assertEquals(-1, schedule.getGrade());
-    assertEquals(1.0, schedule.calcGradeByWeights(0, 1, 0, 0).getGrade());
+    assertNotEquals(Double.MAX_VALUE, schedule.getMaxMakespan());
 
-    // use jump matrix
+    // if make_span is double the min_span, it will give 0 points in makespan_weight
+    schedule.calcStat(schedule.getMaxMakespan() / 2, 5);
+    assertEquals(-1, schedule.getGrade());
+    assertEquals(0, schedule.calcGradeByWeights(0, 1, 0, 0).getGrade());
+
+    // if the make_span is 3 times higher than current schedule, it will goes to negative points
+    schedule.calcStat(schedule.getMaxMakespan() / 3, 5);
+    assertEquals(-1.0, schedule.calcGradeByWeights(0, 1, 0, 0).getGrade());
+
+    // test jump matrix
     this.scheduler = new Scheduler();
     ArrayList<ArrayList<Double>> jump_matrix = new ArrayList<>();
     for (int i = 0; i < 4; i++) {
@@ -126,25 +131,24 @@ class ScheduleTest {
       }
       jump_matrix.add(row);
     }
-    this.scheduler.init(3, 2, 20, 40, 1.1, 0.60, new ArrayList<>(2),
-        new ArrayList<>(20), jump_matrix);
+    this.scheduler.init(4, 0, 0, 0, 0, 0.0, new ArrayList<>(),
+        new ArrayList<>(), jump_matrix);
 
     Schedule schedule1 = new Schedule(schedule);
     schedule1.getMachine(0).scheduleAllOrders(this.scheduler);
     schedule1.getMachine(1).scheduleAllOrders(this.scheduler);
-    schedule1.calcStat(8.0, 5);
-    assertEquals(8.0, schedule1.getMaxMakespan());
+    schedule1.calcStat( schedule1.getMaxMakespan(), 5);
     assertEquals(-1, schedule1.getGrade());
     assertEquals(1.0, schedule1.calcGradeByWeights(0, 1, 0, 0).getGrade());
 
-    // compare schedule and schedule1
-    assertEquals(schedule.getGrade(), schedule1.getGrade());
+    // 3 times make_span's score = - best_makespan's score
+    assertEquals(-schedule.getGrade(), schedule1.getGrade());
     assertEquals(schedule.getMaxMakespan(), schedule1.getMaxMakespan());
 
     // assert gets the same value
     assertEquals(schedule.getMaxMakespan(), schedule1.getMaxMakespan());
-    ArrayList<OrderWithSchedule> orders = schedule.getMachine(0).getOrders();
-    ArrayList<OrderWithSchedule> orders1 = schedule1.getMachine(0).getOrders();
+    ArrayList<OrderWithTime> orders = schedule.getMachine(0).getOrders();
+    ArrayList<OrderWithTime> orders1 = schedule1.getMachine(0).getOrders();
     for (int i = 0; i < 4; ++i) {
       assertEquals(orders.get(i).getOrderID(), orders1.get(i).getOrderID());
       assertEquals(orders.get(i).getStartTime(), orders1.get(i).getStartTime());
@@ -185,7 +189,7 @@ class ScheduleTest {
     AssertionError e2 = assertThrows(AssertionError.class,
         schedule1::getMaxMakespan);
     assertEquals("All machines are empty", e2.getMessage());
-    assertTrue(schedule1.getMachine(1).addOrder(orders.getFirst()));
+    assertTrue(schedule1.getMachine(1).addOrder(orders.get(0)));
     schedule1.getMachine(1).scheduleAllOrders();
     assertEquals(1.0, schedule1.getMaxMakespan());
 
@@ -244,13 +248,13 @@ class ScheduleTest {
 
   @Test
   void testOrder() {
-    OrderWithSchedule o1 = new OrderWithSchedule(orders.get(0));
+    OrderWithTime o1 = new OrderWithTime(orders.get(0));
     assertEquals(1, o1.getOrderID());
-    OrderWithSchedule o2 = new OrderWithSchedule(orders.get(0));
+    OrderWithTime o2 = new OrderWithTime(orders.get(0));
     assertEquals(1, o2.getOrderID());
 
     assertEquals(o1.hashCode(), o2.hashCode());
-    LinkedHashSet<OrderWithSchedule> orders = new LinkedHashSet<>();
+    LinkedHashSet<OrderWithTime> orders = new LinkedHashSet<>();
     assertTrue(orders.add(o1));
     assertFalse(orders.add(o2));
     assertTrue(orders.remove(o2));
@@ -270,8 +274,8 @@ class ScheduleTest {
 
   @Test
   void testOrderWithScheduleEquals() {
-    OrderWithSchedule o1 = new OrderWithSchedule(orders.get(0));
-    OrderWithSchedule o2 = new OrderWithSchedule(orders.get(0));
+    OrderWithTime o1 = new OrderWithTime(orders.get(0));
+    OrderWithTime o2 = new OrderWithTime(orders.get(0));
     assertEquals(o1, o2);
     assertEquals(o1.hashCode(), o2.hashCode());
     assertNotEquals(o1, orders.get(0));
@@ -281,7 +285,7 @@ class ScheduleTest {
 
   @Test
   void testStatusCheck() {
-    OrderWithSchedule o1 = new OrderWithSchedule(orders.get(0));
+    OrderWithTime o1 = new OrderWithTime(orders.get(0));
     IllegalStateException e = assertThrows(IllegalStateException.class,
         o1::statusCheck);
     assertEquals("Start time and end time must be set", e.getMessage());
@@ -294,7 +298,7 @@ class ScheduleTest {
     assertTrue(belowCapacity(schedule.getMachine(0), 10000.0));
     assertFalse(orderFitsMachine(schedule.getMachine(0), orders.get(0)));
     assertFalse(orderFitsMachine(schedule.getMachine(0),
-        new OrderWithSchedule(orders.get(0))));
+        new OrderWithTime(orders.get(0))));
     assertTrue(aboveCapacity(schedule.getMachine(0), 0.0));
   }
 }

@@ -6,7 +6,9 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Spliterator;
 
-// a helper class that works the same as List<Machine> with grades
+/**
+ *
+ */
 public class Schedule implements Comparable<Schedule>,
     Iterable<Schedule.MachineWithOrders> {
 
@@ -17,7 +19,6 @@ public class Schedule implements Comparable<Schedule>,
 
   public Schedule(ArrayList<Machine> machines) {
     _machines = new ArrayList<>(machines.size());
-    // machines.forEach(m -> _machines.add(new MachineWithOrders(m)));
     for (Machine m : machines) {
       _machines.add(new MachineWithOrders(m));
     }
@@ -25,7 +26,6 @@ public class Schedule implements Comparable<Schedule>,
 
   public Schedule(Schedule s) {
     _machines = new ArrayList<>(s._machines.size());
-    // s._machines.forEach(m -> _machines.add(new MachineWithOrders(m)));
     for (MachineWithOrders m : s._machines) {
       _machines.add(new MachineWithOrders(m));
     }
@@ -58,57 +58,59 @@ public class Schedule implements Comparable<Schedule>,
     */
     double max = 0;
     for (MachineWithOrders m : _machines) {
-      ArrayList<OrderWithSchedule> o = m.orders;
+      ArrayList<OrderWithTime> o = m.orders;
       if (o.isEmpty()) {
         continue;
       }
-      /*
-       NOTE: getLast() is not supported until java21 for java8 compatibility,
-             use stream().skip(<size>-1).findFirst() instead
-      */
-      max = Math.max(max, o.getLast()._end_time);
+      max = Math.max(max, o.get(o.size() - 1)._end_time);
     }
     return max;
   }
 
   void calcStat(double min_makespan, int num_orders) {
-    double on_time = 0;
+    double num_on_time = num_orders;
     double makespan = 0;
-    double est = 0;
-    double ldt = 0;
+    double num_violation_earliest_start_time = 0;
+    double num_violation_latest_due_time = 0;
     for (MachineWithOrders m : _machines) {
-      for (OrderWithSchedule o : m.orders) {
+      for (OrderWithTime o : m.orders) {
         assert o._start_time >= 0 && o._end_time >= 0;
         int status = o.statusCheck();
-        // NOTE: enhanced switch is not supported in Java 8, use switch-case instead
         switch (status & 0b11) {
-          case 0b00 -> on_time++;
-          case 0b01 -> ldt++;
-          case 0b10 -> est++;
-          case 0b11 -> {
-            ldt++;
-            est++;
-          }
+          // 0b01 for violate LDT(RED),
+          case 0b01:
+            num_violation_latest_due_time++;
+            num_on_time--;
+            break;
+          // 0b10 for violate EST(PURPLE),
+          case 0b10:
+            num_violation_earliest_start_time++;
+            break;
+          // 0b11 for violate delivery(MAGENTA)
+          case 0b11:
+            num_on_time--;
+            break;
+          default: // 0b00: normal do nothing
+            break;
         }
       }
-      /*
-       NOTE: getLast() is not supported in Java 8
-             use stream().skip(<size>-1).findFirst() instead
-      */
       if (m.orders.isEmpty()) {
         continue;
       } else {
-        makespan = Math.max(makespan, m.orders.getLast()._end_time);
+        makespan = Math.max(makespan,
+            m.orders.get(m.orders.size() - 1)._end_time);
       }
     }
     // IMPORTANT: We change to percentage of good orders
-    ldt = num_orders - ldt;
-    est = num_orders - est;
-    on_time /= num_orders;
+    num_violation_latest_due_time = num_orders - num_violation_latest_due_time;
+    num_violation_earliest_start_time =
+        num_orders - num_violation_earliest_start_time;
+    num_on_time /= num_orders;
     makespan = 2 - makespan / min_makespan;
-    est /= num_orders;
-    ldt /= num_orders;
-    _grade = new Grade(-1, on_time, makespan, est, ldt);
+    num_violation_earliest_start_time /= num_orders;
+    num_violation_latest_due_time /= num_orders;
+    _grade = new Grade(-1, num_on_time, makespan,
+        num_violation_earliest_start_time, num_violation_latest_due_time);
   }
 
   public Grade calcGradeByWeights(int on_time_weight, int makespan_weight,
@@ -131,6 +133,10 @@ public class Schedule implements Comparable<Schedule>,
     return Double.compare(this.getGrade(), o.getGrade());
   }
 
+  /**
+   * <div class="en">Documentation in English</div>
+   * <div class="nl">Documentatie in Nederlands</div>
+   */
   public double getGrade() {
     if (_grade == null) {
       return 0.0;
@@ -152,7 +158,7 @@ public class Schedule implements Comparable<Schedule>,
     StringBuilder s = new StringBuilder();
     for (MachineWithOrders m : _machines) {
       s.append(m.getName()).append(": ");
-      for (OrderWithSchedule o : m) {
+      for (OrderWithTime o : m) {
         s.append(o.getOrderID()).append(" ");
       }
       s.append("| ");
@@ -189,14 +195,15 @@ public class Schedule implements Comparable<Schedule>,
 
   /**
    * Helper class for Machines
+   * <p>
    * NOTE: if memory size is not big issue, we can extend Machine class
    *       for memory efficiency, we use composition by reference
+   * </p>
    */
-  public static class MachineWithOrders implements Iterable<OrderWithSchedule> {
+  public static class MachineWithOrders implements Iterable<OrderWithTime> {
 
     protected final Machine machine;
-    // private final LinkedHashSet<OrderWithSchedule> orders;
-    private final ArrayList<OrderWithSchedule> orders;
+    private final ArrayList<OrderWithTime> orders;
     protected double _approx_run_time = 0;
 
     public MachineWithOrders(Machine machine) {
@@ -207,17 +214,17 @@ public class Schedule implements Comparable<Schedule>,
     public MachineWithOrders(MachineWithOrders machine) {
       this.machine = machine.machine;
       this.orders = new ArrayList<>(machine.orders.size());
-      // machine.orders.forEach(o -> this.orders.add(new OrderWithSchedule(o)));
-      for (OrderWithSchedule o : machine.orders) {
-        this.orders.add(new OrderWithSchedule(o));
+      for (OrderWithTime o : machine.orders) {
+        this.orders.add(new OrderWithTime(o));
       }
       this._approx_run_time = machine._approx_run_time;
     }
 
     /**
      * Add order to the machine
+     * <p>
      * NOTE: This add order doesn't check if the order o is already in the
-     * machine!
+     *       machine. Implement with caution.
      *
      * @param o the order to be added, not checking if it is already in the
      *          machine
@@ -226,7 +233,7 @@ public class Schedule implements Comparable<Schedule>,
     protected boolean addOrder(Order o) {
       // check if producible
       if (machine.checkViableOrder(o.production_type_ID)) {
-        boolean add = orders.add(new OrderWithSchedule(o));
+        boolean add = orders.add(new OrderWithTime(o));
         if (add) {
           _approx_run_time += (double) o.quantity / machine.getProductionPace(
               o.production_type_ID);
@@ -237,7 +244,7 @@ public class Schedule implements Comparable<Schedule>,
     }
 
     protected boolean removeOrder(Order o) {
-      boolean remove = orders.remove(new OrderWithSchedule(o));
+      boolean remove = orders.remove(new OrderWithTime(o));
       if (remove) {
         _approx_run_time -= (double) o.quantity / machine.getProductionPace(
             o.production_type_ID);
@@ -253,18 +260,16 @@ public class Schedule implements Comparable<Schedule>,
     public void scheduleAllOrders(final Scheduler scheduler) {
       double current_time = 0;
       int prev_id = -1;
-      for (OrderWithSchedule o : orders) {
+      for (OrderWithTime o : orders) {
         int production_type_ID = o.order.production_type_ID;
-        // double check for producible NOTE: remove assertion for performance
-        assert machine.checkViableOrder(o.order.production_type_ID) : "Order is not producible";
         double start_time = current_time;
         double switch_time =
             prev_id >= 0 ? scheduler.getSwitchTime(prev_id, production_type_ID)
                 : 0;
         // NOTE: end time is rounded up to the next integer
-        double end_time = Math.ceil(start_time + switch_time
+        double end_time = start_time + switch_time
             + (double) o.order.quantity / machine.getProductionPace(
-            production_type_ID));
+            production_type_ID);
         o.setStartEndTime(start_time, end_time);
 
         current_time = end_time;
@@ -277,18 +282,13 @@ public class Schedule implements Comparable<Schedule>,
      */
     public void scheduleAllOrders() {
       double current_time = 0;
-      int prev_id = -1;
-      for (OrderWithSchedule o : orders) {
-        int order_id = o.order.order_ID;
+      for (OrderWithTime o : orders) {
         double start_time = current_time;
-        double switch_time = 0;
-        double end_time = start_time + switch_time + (int) Math.ceil(
-            (double) o.order.quantity / machine.getProductionPace(
-                o.order.production_type_ID));
+        double end_time =
+            start_time + (double) o.order.quantity / machine.getProductionPace(
+                o.order.production_type_ID);
         o.setStartEndTime(start_time, end_time);
-
         current_time = end_time;
-        prev_id = order_id;
       }
     }
 
@@ -298,7 +298,7 @@ public class Schedule implements Comparable<Schedule>,
      * @return a iterator for OrdersWithSchedule
      */
     @Override
-    public Iterator<OrderWithSchedule> iterator() {
+    public Iterator<OrderWithTime> iterator() {
       return orders.iterator();
     }
 
@@ -310,41 +310,58 @@ public class Schedule implements Comparable<Schedule>,
       return machine.machine_ID;
     }
 
-    public ArrayList<OrderWithSchedule> getOrders() {
+    /**
+     * @return a copy of the orders
+     */
+    public ArrayList<OrderWithTime> getOrders() {
       return new ArrayList<>(orders);
     }
 
   }
 
   /**
-   * Helper class for Orders
-   *   NOTE: if memory size is not big issue, we can extend Order class
-   *         for memory efficiency, we use composition by reference
-   *   XXX: All the time variables in Order/OrderWithSchedule is in integer
+   * Helper class for Orders。
+   * <p> The class that takes the original Order as a reference and have
+   * additional start time, end time, and status for schedule checking.
+   * </p>
+   * <p><strong>
+   * NOTE: if memory size is not big issue, we can extend Order class. But
+   *       for memory efficiency, we use composition by reference
+   * </strong></p>
+   * <p><strong>
+   * NOTE: All the time variables in Order/OrderWithTime is in integer
+   *       format, which may not enough for precision. We can change to double
+   *       format if needed.
+   * </strong></p>
    */
 
-  public static class OrderWithSchedule {
+  public static class OrderWithTime {
 
+    // reference to the original order
     protected final Order order;
+
+    // start time and end time for the order
     private int _start_time = -1;
     private int _end_time = -1;
 
-    // bitwise status (1 for true, 0 for false)
-    // 0...00      | 00             | 00
-    // error code  | running status | schedule status
-    // NOTE: error code and running status are not used (for now)
-    // schedule status: 0b00 for on time(GREEN),
-    //                  0b01 for violate LDT(RED),
-    //                  0b10 for violate EST(PURPLE),
-    //                  0b11 for violate delivery(MAGENTA)
-    // ....
+    /**
+     * bitwise status (1 for true, 0 for false) 0...00      | 00             |
+     * 00 error code  | running status | schedule status
+     * NOTE: error code and running status are not used (for now)
+     *       change to enum if needed
+     * schedule status: 0b00 for on time(GREEN),
+     * 0b01 for violate LDT(RED),
+     * 0b10 for violate EST(PURPLE),
+     * 0b11 for violate delivery(MAGENTA)
+     * ....
+     */
     private int status = 0b10000;
 
-    public OrderWithSchedule(Order order) {
+    public OrderWithTime(Order order) {
       this.order = order;
     }
 
-    public OrderWithSchedule(OrderWithSchedule o) {
+    public OrderWithTime(OrderWithTime o) {
       this.order = o.order;
       this._start_time = o._start_time;
       this._end_time = o._end_time;
@@ -368,20 +385,21 @@ public class Schedule implements Comparable<Schedule>,
     }
 
     public String getColorCode() throws AssertionError {
-      // TODO assert status >> 4 == 0 : "Error code must be 0";
-      // NOTE: enhanced switch is not supported in Java 8, use switch-case instead
-      return switch (status & 0b11) {
-        case 0b00 -> "status-green";
-        case 0b01 -> "status-red";
-        case 0b10 -> "status-est-violate";
-        default -> // 0b11 for violate delivery, no way out of scope
-            "status-deli-violate";
-      };
+      switch (status & 0b11) {
+        case 0b00:
+          return "status-green";
+        case 0b01:
+          return "status-red";
+        case 0b10:
+          return "status-est-violate";
+        default: // 0b11 for violate delivery, no way out of scope
+          return "status-deli-violate";
+      }
     }
 
     protected void setStartEndTime(final double start_time,
         final double end_time) {
-      setStartEndTime((int) start_time, (int) end_time);
+      setStartEndTime((int) start_time, (int) Math.ceil(end_time));
     }
 
     protected void setStartEndTime(final int start_time, final int end_time)
@@ -394,7 +412,6 @@ public class Schedule implements Comparable<Schedule>,
     }
 
     public int statusCheck() throws IllegalStateException {
-      // UNDONE assert status >> 4 == 0 : "Error code must be 0";
       int earliest_start_time = order.earliest_start_time;
       int delivery_time = order.delivery_time;
       int latest_due_time = order.latest_due_time;
@@ -428,8 +445,7 @@ public class Schedule implements Comparable<Schedule>,
       if (o == null || getClass() != o.getClass()) {
         return false;
       }
-      return this.order.getOrderID()
-          == ((OrderWithSchedule) o).order.getOrderID();
+      return this.order.getOrderID() == ((OrderWithTime) o).order.getOrderID();
     }
   }
 
