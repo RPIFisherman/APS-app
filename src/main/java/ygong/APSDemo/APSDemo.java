@@ -1,3 +1,5 @@
+package ygong.APSDemo;
+
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
@@ -20,6 +22,7 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import ygong.APS.Schedule;
 import ygong.APS.Schedule.MachineWithOrders;
+import ygong.APS.Schedule.OrderWithTime;
 import ygong.APS.Scheduler;
 
 public class APSDemo extends Application {
@@ -31,11 +34,19 @@ public class APSDemo extends Application {
   @Override
   public void start(Stage stage) {
     showWeightInputWindow(stage, weights -> {
-      Scheduler scheduler = new Scheduler(2);
-      scheduler.initRandom(3, 2, 26, 40, 1.25, 0.77, 1337);
-      // scheduler.initRandom(3, 2, 4, 40, 2, 0.0, 1337);
+      int PRINT_NUM = 100;
+      Scheduler scheduler = new Scheduler(8);
+
+      // Init random data
+      // scheduler.initRandom(3, 2, 20, 40, 1.25, 0.8, 1337);
+      // scheduler.initRandom(3, 2, 20, 40, 1, 0.0,1337);
+      // NOTE:need -Xmx8g for following test, takes a loooooong time
+      scheduler.initRandom(3, 3, 30, 40, 1.05, 1.0, 1337);
+
       long startTime = System.nanoTime();
+
       scheduler.generateAllPossible();
+
       long endTime = System.nanoTime();
       System.out.println("Time elapsed for generate all possible schedules: "
           + (endTime - startTime) / 1000000 + "ms");
@@ -54,12 +65,12 @@ public class APSDemo extends Application {
       */
       scheduler.calcAllSchedulesGrade(weights[0], weights[1], weights[2],
           weights[3]);
+
       endTime = System.nanoTime();
-      List<Schedule> schedules = scheduler.getSchedules();
       System.out.println("Time elapsed for update all possible schedules: "
           + (endTime - startTime) / 1000000 + "ms");
 
-      int PRINT_NUM = 10;
+      List<Schedule> schedules = scheduler.getSchedules();
       System.out.println(schedules.size());
       if (schedules.size() < PRINT_NUM) {
         PRINT_NUM = schedules.size();
@@ -81,7 +92,7 @@ public class APSDemo extends Application {
 
         System.out.println("Grade: " + grade);
         for(MachineWithOrders m : schedule) {
-          for (ygong.APS.Schedule.OrderWithSchedule o : m) {
+          for (OrderWithTime o : m) {
             System.out.print(o.getOrderID() + " ");
           }
           System.out.println();
@@ -136,22 +147,22 @@ public class APSDemo extends Application {
 
     Label on_time_label = new Label("On Time (%):");
     grid.add(on_time_label, 0, 1);
-    TextField on_time_field = new TextField("100");
+    TextField on_time_field = new TextField("40");
     grid.add(on_time_field, 1, 1);
 
     Label makespan_label = new Label("Makespan (%):");
     grid.add(makespan_label, 0, 2);
-    TextField makespan_field = new TextField("100");
+    TextField makespan_field = new TextField("30");
     grid.add(makespan_field, 1, 2);
 
     Label est_violate_label = new Label("EST Violate (%):");
     grid.add(est_violate_label, 0, 3);
-    TextField est_violate_field = new TextField("100");
+    TextField est_violate_field = new TextField("15");
     grid.add(est_violate_field, 1, 3);
 
     Label ldt_violate_label = new Label("LDT Violate (%):");
     grid.add(ldt_violate_label, 0, 4);
-    TextField ldt_violate_field = new TextField("100");
+    TextField ldt_violate_field = new TextField("15");
     grid.add(ldt_violate_field, 1, 4);
 
     Button submit_button = new Button("Submit");
