@@ -1,12 +1,12 @@
 package ygong.APS;
 
-import ygong.APS.Order;
-
 import ygong.APS.Schedule.MachineWithOrders;
-import ygong.APS.Schedule.OrderWithSchedule;
+import ygong.APS.Schedule.OrderWithTime;
 
 public enum Rules {
   ;
+  protected static double capacityLowerBound = -1;
+  protected static double capacityUpperBound = -1;
 
   // * after all order are settled
   // Other rules can be added belowCapacityInSize
@@ -14,8 +14,21 @@ public enum Rules {
     return machine._approx_run_time < threshold;
   }
 
-  // * during the setting
-  public static boolean orderFitsMachine(MachineWithOrders machine, OrderWithSchedule order) {
+  public static boolean belowCapacity(MachineWithOrders machine) {
+    return machine._approx_run_time < capacityLowerBound;
+  }
+
+  // * can be checked during and after the setting
+  public static boolean aboveCapacity(MachineWithOrders machine, double threshold) {
+    return machine._approx_run_time > threshold;
+  }
+
+  public static boolean aboveCapacity(MachineWithOrders machine) {
+    return machine._approx_run_time > capacityUpperBound;
+  }
+
+  // * before adding the order
+  public static boolean orderFitsMachine(MachineWithOrders machine, OrderWithTime order) {
     return machine.machine.checkViableOrder(order.order.production_type_ID);
   }
 
@@ -23,8 +36,4 @@ public enum Rules {
     return machine.machine.checkViableOrder(order.production_type_ID);
   }
 
-  // * can be checked during and after the setting
-  public static boolean aboveCapacity(MachineWithOrders machine, double threshold) {
-    return machine._approx_run_time > threshold;
-  }
 }
