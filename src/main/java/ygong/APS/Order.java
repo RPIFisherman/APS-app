@@ -13,8 +13,8 @@ package ygong.APS;
  *
  * <dl>
  *   <dt>Order has following constraints:</dt>
- *   <dd>1. earliest_start_time <= delivery_time <= latest_due_time</dd>
- *   <dd>2. quantity > 0</dd>
+ *   <dd>1. earliest_start_time &le; delivery_time &le; latest_due_time</dd>
+ *   <dd>2. quantity &gt; 0</dd>
  *   <dt>{@link Schedule.Grade} will check(as soft-bounds, not hard-requirements) to give a score:</dt>
  *   <dd>1. earliest_start_time: the time when the order can start</dd>
  *   <dd>2. delivery_time: the time when the order is delivered</dd>

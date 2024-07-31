@@ -32,11 +32,7 @@ import java.util.Spliterator;
  *
  * @author <a href="mailto:yuyanggong.rpi@gmail.com">Yuyang Gong</a>
  * @version 1.0
- * @implNote The schedule is implemented as an ArrayList of
- * {@link MachineWithOrders} and the grade is calculated based on the on-time
- * percentage, makespan percentage, earliest start time percentage, and latest
- * due time percentage. The grade is used to compare schedules and determine the
- * best schedule.
+ * @note The schedule is implemented as an ArrayList of {@link MachineWithOrders} and the grade is calculated based on the on-time percentage, makespan percentage, earliest start time percentage, and latest due time percentage. The grade is used to compare schedules and determine the best schedule.
  * @see MachineWithOrders
  * @see OrderWithTime
  * @see Grade
@@ -223,10 +219,10 @@ public class Schedule implements Comparable<Schedule>,
    */
   @Override
   public int compareTo(Schedule o) {
-    try{
+    try {
       return this._grade.compareTo(o._grade);
     } catch (NullPointerException e) {
-      return Double.compare(this.getGrade(),o.getGrade());
+      return Double.compare(this.getGrade(), o.getGrade());
     }
   }
 

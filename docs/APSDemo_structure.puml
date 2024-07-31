@@ -1,0 +1,289 @@
+@startuml
+
+/' diagram meta data start
+config=StructureConfiguration;
+{
+  "projectClassification": {
+    "searchMode": "OpenProject", // OpenProject, AllProjects
+    "includedProjects": "",
+    "pathEndKeywords": "*.impl",
+    "isClientPath": "",
+    "isClientName": "",
+    "isTestPath": "",
+    "isTestName": "",
+    "isMappingPath": "",
+    "isMappingName": "",
+    "isDataAccessPath": "",
+    "isDataAccessName": "",
+    "isDataStructurePath": "",
+    "isDataStructureName": "",
+    "isInterfaceStructuresPath": "",
+    "isInterfaceStructuresName": "",
+    "isEntryPointPath": "",
+    "isEntryPointName": "",
+    "treatFinalFieldsAsMandatory": false
+  },
+  "graphRestriction": {
+    "classPackageExcludeFilter": "",
+    "classPackageIncludeFilter": "",
+    "classNameExcludeFilter": "",
+    "classNameIncludeFilter": "",
+    "methodNameExcludeFilter": "",
+    "methodNameIncludeFilter": "",
+    "removeByInheritance": "", // inheritance/annotation based filtering is done in a second step
+    "removeByAnnotation": "",
+    "removeByClassPackage": "", // cleanup the graph after inheritance/annotation based filtering is done
+    "removeByClassName": "",
+    "cutMappings": false,
+    "cutEnum": true,
+    "cutTests": true,
+    "cutClient": true,
+    "cutDataAccess": false,
+    "cutInterfaceStructures": false,
+    "cutDataStructures": false,
+    "cutGetterAndSetter": true,
+    "cutConstructors": true
+  },
+  "graphTraversal": {
+    "forwardDepth": 6,
+    "backwardDepth": 6,
+    "classPackageExcludeFilter": "",
+    "classPackageIncludeFilter": "",
+    "classNameExcludeFilter": "",
+    "classNameIncludeFilter": "",
+    "methodNameExcludeFilter": "",
+    "methodNameIncludeFilter": "",
+    "hideMappings": false,
+    "hideDataStructures": false,
+    "hidePrivateMethods": true,
+    "hideInterfaceCalls": true, // indirection: implementation -> interface (is hidden) -> implementation
+    "onlyShowApplicationEntryPoints": false, // root node is included
+    "useMethodCallsForStructureDiagram": "ForwardOnly" // ForwardOnly, BothDirections, No
+  },
+  "details": {
+    "aggregation": "GroupByClass", // ByClass, GroupByClass, None
+    "showClassGenericTypes": true,
+    "showMethods": true,
+    "showMethodParameterNames": true,
+    "showMethodParameterTypes": true,
+    "showMethodReturnType": true,
+    "showPackageLevels": 2,
+    "showDetailedClassStructure": true
+  },
+  "rootClass": "APSDemo",
+  "extensionCallbackMethod": "" // qualified.class.name#methodName - signature: public static String method(String)
+}
+diagram meta data end '/
+
+
+
+digraph g {
+    rankdir="TB"
+    splines=polyline
+    
+
+'nodes 
+subgraph cluster_65028 { 
+   	label=APS
+	labeljust=l
+	fillcolor="#ececec"
+	style=filled
+   
+   Machine1858361680[
+	label=<<TABLE BORDER="1" CELLBORDER="0" CELLPADDING="4" CELLSPACING="0">
+<TR><TD ALIGN="LEFT" >(C)Machine</TD></TR>
+<HR/>
+<TR><TD ALIGN="LEFT" >+   machine_ID: int [1]</TD></TR>
+<TR><TD ALIGN="LEFT" >+   name: String [0..1]</TD></TR>
+<TR><TD ALIGN="LEFT" >-   products_pace_per_hour: HashMap&lt;Integer, Integer&gt; [0..*]</TD></TR>
+<HR/>
+<TR><TD ALIGN="LEFT" >+ checkViableOrder(production_type_ID: int): boolean</TD></TR>
+<TR><TD ALIGN="LEFT" >+ getProductionPace(production_type_id: int): int</TD></TR>
+</TABLE>>
+	style=filled
+	margin=0
+	shape=plaintext
+	fillcolor="#FFFFFF"
+];
+
+Order1858361680[
+	label=<<TABLE BORDER="1" CELLBORDER="0" CELLPADDING="4" CELLSPACING="0">
+<TR><TD ALIGN="LEFT" >(C)Order</TD></TR>
+<HR/>
+<TR><TD ALIGN="LEFT" >#   delivery_time: int [1]</TD></TR>
+<TR><TD ALIGN="LEFT" >#   earliest_start_time: int [1]</TD></TR>
+<TR><TD ALIGN="LEFT" >#   latest_due_time: int [1]</TD></TR>
+<TR><TD ALIGN="LEFT" >#   name: String [0..1]</TD></TR>
+<TR><TD ALIGN="LEFT" >#   order_ID: int [1]</TD></TR>
+<TR><TD ALIGN="LEFT" >#   production_type_ID: int [1]</TD></TR>
+<TR><TD ALIGN="LEFT" >#   quantity: int [1]</TD></TR>
+</TABLE>>
+	style=filled
+	margin=0
+	shape=plaintext
+	fillcolor="#FFFFFF"
+];
+
+Schedule1858361680[
+	label=<<TABLE BORDER="1" CELLBORDER="0" CELLPADDING="4" CELLSPACING="0">
+<TR><TD ALIGN="LEFT" >(C)Schedule</TD></TR>
+<HR/>
+<TR><TD ALIGN="LEFT" >-   _grade: Grade [0..1]</TD></TR>
+<TR><TD ALIGN="LEFT" >-   _machines: ArrayList&lt;MachineWithOrders&gt; [0..*]</TD></TR>
+<HR/>
+<TR><TD ALIGN="LEFT" >+ calcGradeByWeights(on_time_weight: int, makespan_weight: int, est_weight: int, ldt_weight: int): Grade</TD></TR>
+<TR><TD ALIGN="LEFT" ># calcStat(min_makespan: double, num_orders: int)</TD></TR>
+<TR><TD ALIGN="LEFT" >+ compareTo(o: Schedule): int</TD></TR>
+<TR><TD ALIGN="LEFT" >+ getMachine(i: int): MachineWithOrders</TD></TR>
+<TR><TD ALIGN="LEFT" >+ iterator(): Iterator&lt;MachineWithOrders&gt;</TD></TR>
+<TR><TD ALIGN="LEFT" >+ scheduleAllOrders(scheduler: Scheduler)</TD></TR>
+<TR><TD ALIGN="LEFT" >+ spliterator(): Spliterator&lt;MachineWithOrders&gt;</TD></TR>
+</TABLE>>
+	style=filled
+	margin=0
+	shape=plaintext
+	fillcolor="#FFFFFF"
+];
+
+Scheduler1858361680[
+	label=<<TABLE BORDER="1" CELLBORDER="0" CELLPADDING="4" CELLSPACING="0">
+<TR><TD ALIGN="LEFT" >(C)Scheduler</TD></TR>
+<HR/>
+<TR><TD ALIGN="LEFT" >-   _executor: ExecutorService [0..1]</TD></TR>
+<TR><TD ALIGN="LEFT" >-   _futures: ArrayList&lt;Future&lt;Double&gt;&gt; [0..*]</TD></TR>
+<TR><TD ALIGN="LEFT" >-   _machines: ArrayList&lt;Machine&gt; [0..*]</TD></TR>
+<TR><TD ALIGN="LEFT" >-   _max_capacity_per_machine: double [1]</TD></TR>
+<TR><TD ALIGN="LEFT" >-   _max_units_allowed: int [1]</TD></TR>
+<TR><TD ALIGN="LEFT" >-   _min_capacity_per_machine: double [1]</TD></TR>
+<TR><TD ALIGN="LEFT" >-   _min_makespan: double [1]</TD></TR>
+<TR><TD ALIGN="LEFT" >-   _num_machines: int [1]</TD></TR>
+<TR><TD ALIGN="LEFT" >-   _num_orders: int [1]</TD></TR>
+<TR><TD ALIGN="LEFT" >-   _num_production_types: int [1]</TD></TR>
+<TR><TD ALIGN="LEFT" >-   _num_threads: int [1]</TD></TR>
+<TR><TD ALIGN="LEFT" >-   _order_type_switch_times: ArrayList&lt;ArrayList&lt;Double&gt;&gt; [0..*]</TD></TR>
+<TR><TD ALIGN="LEFT" >-   _orders: ArrayList&lt;Order&gt; [0..*]</TD></TR>
+<TR><TD ALIGN="LEFT" >-   _schedules: List&lt;Schedule&gt; [0..*]</TD></TR>
+<HR/>
+<TR><TD ALIGN="LEFT" >+ calcAllSchedulesGrade(weights: Integer...)</TD></TR>
+<TR><TD ALIGN="LEFT" >+ createChart(index: int): GanttChart&lt;Number, String&gt;</TD></TR>
+<TR><TD ALIGN="LEFT" >+ createChart(schedule: Schedule): GanttChart&lt;Number, String&gt;</TD></TR>
+<TR><TD ALIGN="LEFT" >- depthFirstSearch(order_index: int, schedule: Schedule)</TD></TR>
+<TR><TD ALIGN="LEFT" >+ generateAllPossible()</TD></TR>
+<TR><TD ALIGN="LEFT" >+ getBestSchedule(num: int): List&lt;Schedule&gt;</TD></TR>
+<TR><TD ALIGN="LEFT" ># getSwitchTime(i: int, j: int): double</TD></TR>
+<TR><TD ALIGN="LEFT" >+ init(num_order_types: int, num_machines: int, num_orders: int, max_units_allowed: int, max_capacity_per_machine: double, min_capacity_per_machine: double, machines: ArrayList&lt;Machine&gt;, orders: ArrayList&lt;Order&gt;, order_type_switch_times: ArrayList&lt;ArrayList&lt;Double&gt;&gt;)</TD></TR>
+<TR><TD ALIGN="LEFT" >+ initRandom(num_order_types: int, num_machines: int, num_orders: int, max_units_allowed: int, max_capacity_per_machine: double, min_capacity_per_machine: double, seed: Integer...)</TD></TR>
+</TABLE>>
+	style=filled
+	margin=0
+	shape=plaintext
+	fillcolor="#FFFFFF"
+];
+
+subgraph cluster_770666337 { 
+   	label=Schedule
+	labeljust=l
+	fillcolor="#d8d8d8"
+	style=filled
+   
+   Grade1316370379[
+	label=<<TABLE BORDER="1" CELLBORDER="0" CELLPADDING="4" CELLSPACING="0">
+<TR><TD ALIGN="LEFT" >(C)Grade</TD></TR>
+<HR/>
+<TR><TD ALIGN="LEFT" >#   est_percentage: double [1]</TD></TR>
+<TR><TD ALIGN="LEFT" >-   grade: double [1]</TD></TR>
+<TR><TD ALIGN="LEFT" >#   ldt_percentage: double [1]</TD></TR>
+<TR><TD ALIGN="LEFT" >#   makespan_percentage: double [1]</TD></TR>
+<TR><TD ALIGN="LEFT" >#   on_time_percentage: double [1]</TD></TR>
+<HR/>
+<TR><TD ALIGN="LEFT" >- calcGradeByWeights(on_time_weight: int, makespan_weight: int, est_weight: int, ldt_weight: int)</TD></TR>
+<TR><TD ALIGN="LEFT" >+ compareTo(o: Grade): int</TD></TR>
+</TABLE>>
+	style=filled
+	margin=0
+	shape=plaintext
+	fillcolor="#FFFFFF"
+];
+
+MachineWithOrders1316370379[
+	label=<<TABLE BORDER="1" CELLBORDER="0" CELLPADDING="4" CELLSPACING="0">
+<TR><TD ALIGN="LEFT" >(C)MachineWithOrders</TD></TR>
+<HR/>
+<TR><TD ALIGN="LEFT" >#   _approx_run_time: double [1]</TD></TR>
+<TR><TD ALIGN="LEFT" >#   machine: Machine [0..1]</TD></TR>
+<TR><TD ALIGN="LEFT" >-   orders: ArrayList&lt;OrderWithTime&gt; [0..*]</TD></TR>
+<HR/>
+<TR><TD ALIGN="LEFT" ># addOrder(o: Order): boolean</TD></TR>
+<TR><TD ALIGN="LEFT" >+ iterator(): Iterator&lt;OrderWithTime&gt;</TD></TR>
+<TR><TD ALIGN="LEFT" ># removeOrder(o: Order): boolean</TD></TR>
+<TR><TD ALIGN="LEFT" >+ scheduleAllOrders(scheduler: Scheduler)</TD></TR>
+<TR><TD ALIGN="LEFT" >+ scheduleAllOrders()</TD></TR>
+</TABLE>>
+	style=filled
+	margin=0
+	shape=plaintext
+	fillcolor="#FFFFFF"
+];
+
+OrderWithTime1316370379[
+	label=<<TABLE BORDER="1" CELLBORDER="0" CELLPADDING="4" CELLSPACING="0">
+<TR><TD ALIGN="LEFT" >(C)OrderWithTime</TD></TR>
+<HR/>
+<TR><TD ALIGN="LEFT" >-   _end_time: int [1]</TD></TR>
+<TR><TD ALIGN="LEFT" >-   _start_time: int [1]</TD></TR>
+<TR><TD ALIGN="LEFT" >#   order: Order [0..1]</TD></TR>
+<TR><TD ALIGN="LEFT" >-   status: int [1]</TD></TR>
+<HR/>
+<TR><TD ALIGN="LEFT" >+ statusCheck(): int</TD></TR>
+</TABLE>>
+	style=filled
+	margin=0
+	shape=plaintext
+	fillcolor="#FFFFFF"
+];
+} 
+} 
+
+subgraph cluster_72692217 { 
+   	label=APSDemo
+	labeljust=l
+	fillcolor="#ececec"
+	style=filled
+   
+   APSDemo72692217[
+	label=<<TABLE BORDER="1" CELLBORDER="0" CELLPADDING="4" CELLSPACING="0">
+<TR><TD ALIGN="LEFT" >(C)APSDemo</TD></TR>
+<HR/>
+<TR><TD ALIGN="LEFT" >+ main(args: String[])</TD></TR>
+<TR><TD ALIGN="LEFT" >- showWeightInputWindow(stage: Stage, onWeightsSubmitted: Consumer&lt;int[]&gt;)</TD></TR>
+<TR><TD ALIGN="LEFT" >+ start(stage: Stage)</TD></TR>
+</TABLE>>
+	style=filled
+	margin=0
+	shape=plaintext
+	fillcolor="#FFFFFF"
+];
+} 
+
+'edges    
+MachineWithOrders1316370379 -> Machine1858361680[label="machine
+[0..1]"];
+MachineWithOrders1316370379 -> OrderWithTime1316370379[label="orders
+[0..*]"];
+MachineWithOrders1316370379 -> Scheduler1858361680[label="scheduleAllOrders() -> getSwitchTime()"];
+OrderWithTime1316370379 -> Order1858361680[label="order
+[0..1]"];
+Schedule1858361680 -> Grade1316370379[label="_grade
+[0..1]"];
+Schedule1858361680 -> MachineWithOrders1316370379[label="_machines
+[0..*]"];
+Schedule1858361680 -> OrderWithTime1316370379[label="calcStat() -> statusCheck()"];
+Scheduler1858361680 -> Machine1858361680[label="_machines
+[0..*]"];
+Scheduler1858361680 -> Order1858361680[label="_orders
+[0..*]"];
+Scheduler1858361680 -> Schedule1858361680[label="_schedules
+[0..*]"];
+    
+}
+@enduml
