@@ -23,6 +23,8 @@ implemented using the [javafx](https://openjfx.io/) library.
 
 [![Qodana](https://github.com/RPIFisherman/APS-app/actions/workflows/qodana_code_quality.yml/badge.svg)](https://github.com/RPIFisherman/APS-app/actions/workflows/qodana_code_quality.yml)
 [![Mirror GitHub Auto Queried Repos to Gitee](https://github.com/RPIFisherman/APS-app/actions/workflows/auto_sync.yml/badge.svg?branch=master)](https://github.com/RPIFisherman/APS-app/actions/workflows/auto_sync.yml)
+[![JavaDocs](https://img.shields.io/badge/javadoc-1.0.0-brightgreen.svg)](https://rpifisherman.github.io/APS-app/javadocs/index.html)
+[![APS-JavaDocs](https://img.shields.io/badge/APS_Package-JavaDocs-blue)](https://rpifisherman.github.io/APS-app/javadocs/ygong/APS/package-summary.html)
 
 Thanks to [Roland's Gantt Plot code](https://stackoverflow.com/questions/27975898/gantt-chart-from-scratch), which helps me a lot on JavaFX. 
 
@@ -31,9 +33,11 @@ Thanks to [Roland's Gantt Plot code](https://stackoverflow.com/questions/2797589
 - Java 21 or above is recommended. Otherwise, need to change some of the code to make it compatible with Java 8. See ``NOTE`` tags in the code.
 - Maven 3. I test with maven
 
+## APSDemo:
+![APSDemo Structure](docs/APSDemo_structure.png)
+## APSDemo Output:
+![APSDemo Output](docs/demo.png)
+
 ## Project Structure:
+![Scheduler Structure](docs/Scheduler_structure.png)
 
-[//]: # (TODO)
-[//]: # (![Project Structure]&#40;structure.png&#41;)
-
-## Output Demo:

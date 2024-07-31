@@ -18,6 +18,7 @@ class timerAPS {
     List<Schedule> schedules = scheduler.getSchedules();
     List<Schedule> best_schedules = scheduler.getBestSchedule(10);
     System.out.println(schedules.size());
+    System.out.println(best_schedules.size());
 
     // total memory
     Runtime runtime = Runtime.getRuntime();
@@ -35,10 +36,10 @@ class timerAPS {
     Scheduler scheduler = new Scheduler();
     int[] weights = {40, 30, 10, 10};
 
-    // scheduler.initRandom(3, 2, 3, 40, 5, 0, 1337);
-    // scheduler.initRandom(3, 3, 20, 30, 1.05, 1.0, 1337);
-    // scheduler.initRandom(3, 2, 20, 40, 1.5, 1.2, 1337);
-    // scheduler.initRandom(3, 2, 20, 40, 1.5, 1.4, 1337);
+    scheduler.initRandom(3, 2, 3, 40, 5, 0, 1337);
+    scheduler.initRandom(3, 3, 20, 30, 1.05, 1.0, 1337);
+    scheduler.initRandom(3, 2, 20, 40, 1.5, 1.2, 1337);
+    scheduler.initRandom(3, 2, 20, 40, 1.5, 1.4, 1337);
     scheduler.initRandom(3, 2, 10, 30, 1.5, 0.1, 1337);
 
     scheduler.generateAllPossible();
