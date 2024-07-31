@@ -97,6 +97,7 @@ public class Order {
 
   /**
    * Copy constructor for Order
+   *
    * @param o Order to copy
    */
   public Order(Order o) {

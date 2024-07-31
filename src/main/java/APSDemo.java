@@ -26,20 +26,17 @@ import ygong.APS.Scheduler;
 /**
  * A demo application for the APS project
  * <p>
- *   This application demonstrates the APS project by generating random data and
- *   calculating the best schedules based on the given weights.
- *   The user can input the weights for the grade calculation in the GUI.
- *   The application will then display the best schedules in a tabbed window.
- *   The user can see the grade of each schedule and the order of each machine
- *   in the schedule.
- *   The application also displays a chart for the best schedules.
+ * This application demonstrates the APS project by generating random data and
+ * calculating the best schedules based on the given weights. The user can input
+ * the weights for the grade calculation in the GUI. The application will then
+ * display the best schedules in a tabbed window. The user can see the grade of
+ * each schedule and the order of each machine in the schedule. The application
+ * also displays a chart for the best schedules.
  * </p>
- *   Feel free to modify the weights and the random data generation in the
- *   {@link #start(Stage)} method to see different results. Have fun!
+ * Feel free to modify the weights and the random data generation in the
+ * {@link #start(Stage)} method to see different results. Have fun!
  *
- * @author <a
- * href="mailto:yuyanggong.rpi@gmail.com">Yuyang
- * Gong</a>
+ * @author <a href="mailto:yuyanggong.rpi@gmail.com">Yuyang Gong</a>
  * @version 1.0
  */
 public class APSDemo extends Application {
@@ -55,6 +52,7 @@ public class APSDemo extends Application {
 
   /**
    * The main demo method for the ygong.APSDemo application
+   *
    * @param stage the primary stage for this application
    */
   @Override
@@ -115,7 +113,7 @@ public class APSDemo extends Application {
         Label label = new Label(schedule.toString());
 
         System.out.println("Grade: " + grade);
-        for(MachineWithOrders m : schedule) {
+        for (MachineWithOrders m : schedule) {
           for (OrderWithTime o : m) {
             System.out.print(o.getOrderID() + " ");
           }
@@ -162,7 +160,8 @@ public class APSDemo extends Application {
 
   /**
    * Show the weight input window
-   * @param stage stage for the input window
+   *
+   * @param stage              stage for the input window
    * @param onWeightsSubmitted callback for when the weights are submitted
    */
   private void showWeightInputWindow(Stage stage,

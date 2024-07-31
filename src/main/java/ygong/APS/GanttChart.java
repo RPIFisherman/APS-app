@@ -17,16 +17,16 @@ import javafx.scene.shape.Rectangle;
 
 /**
  * This GanttChart class is copied from
- * <a href="https://stackoverflow.com/questions/27975898/gantt-chart-from-scratch">Roland</a>
+ * <a
+ * href="https://stackoverflow.com/questions/27975898/gantt-chart-from-scratch">Roland</a>
  *
  * @param <X> X-axis type
  * @param <Y> Y-axis type
- *
- * @see <a href="https://stackoverflow.com/questions/27975898/gantt-chart-from-scratch">StackOverflow</a>
- * @author <a href="https://stackoverflow.com/users/1844265/roland">Roland</a>, <a
- * href="mailto:yuyanggong.rpi@gmail.com">Yuyang
- * Gong</a>
+ * @author <a href="https://stackoverflow.com/users/1844265/roland">Roland</a>,
+ * <a href="mailto:yuyanggong.rpi@gmail.com">Yuyang Gong</a>
  * @version 1.0
+ * @see <a
+ * href="https://stackoverflow.com/questions/27975898/gantt-chart-from-scratch">StackOverflow</a>
  * @since 1.0
  */
 public class GanttChart<X, Y> extends XYChart<X, Y> {
@@ -35,6 +35,7 @@ public class GanttChart<X, Y> extends XYChart<X, Y> {
 
   /**
    * Construct a new GanttChart with the given axis.
+   *
    * @param xAxis X-axis of the chart
    * @param yAxis Y-axis of the chart
    */
@@ -46,7 +47,7 @@ public class GanttChart<X, Y> extends XYChart<X, Y> {
   /**
    * @param xAxis X-axis of the chart
    * @param yAxis Y-axis of the chart
-   * @param data Data of the chart
+   * @param data  Data of the chart
    */
   public GanttChart(@NamedArg("xAxis") Axis<X> xAxis,
       @NamedArg("yAxis") Axis<Y> yAxis,
@@ -141,10 +142,9 @@ public class GanttChart<X, Y> extends XYChart<X, Y> {
   }
 
   /**
-   * @param series the series to add
+   * @param series    the series to add
    * @param itemIndex the index of the item
-   * @param item the item to add
-   *
+   * @param item      the item to add
    * @see GanttChart#createContainer(Series, int, Data, int)
    */
   @Override
@@ -156,7 +156,7 @@ public class GanttChart<X, Y> extends XYChart<X, Y> {
   }
 
   /**
-   * @param item the item to remove
+   * @param item   the item to remove
    * @param series the series to remove
    */
   @Override
@@ -175,9 +175,8 @@ public class GanttChart<X, Y> extends XYChart<X, Y> {
   }
 
   /**
-   * @param series the series to change
+   * @param series      the series to change
    * @param seriesIndex the index of the series
-   *
    * @see GanttChart#createContainer(Series, int, Data, int)
    */
   @Override
@@ -266,7 +265,7 @@ public class GanttChart<X, Y> extends XYChart<X, Y> {
     public String styleClass;
 
     /**
-     * @param length the length of the data
+     * @param length     the length of the data
      * @param styleClass the style string
      */
     public ExtraData(double length, String styleClass) {

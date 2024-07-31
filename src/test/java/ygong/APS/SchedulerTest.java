@@ -95,14 +95,15 @@ class SchedulerTest {
     // test Min Capacity lower bound
     scheduler = new Scheduler();
     scheduler.initRandom(num_order_types, num_machines, num_orders, max_units,
-        max_capacity, max_capacity-0.0000001, seed);
+        max_capacity, max_capacity - 0.0000001, seed);
     scheduler.generateAllPossible();
     schedules = scheduler.getSchedules();
     assertEquals(0, schedules.size());
   }
 
   /**
-   * Test for simple ygong.APSDemo.java, which is a typical usage of the package
+   * Test for simple ygong.APSDemo.java, which is a typical usage of the
+   * package
    */
   @Test
   void testTypicalUsage() {
@@ -126,17 +127,19 @@ class SchedulerTest {
     List<Schedule> bestSchedule = scheduler.getBestSchedule(1);
     List<Schedule> worstSchedule = scheduler.getBestSchedule(-1);
     assertNotEquals(bestSchedule, worstSchedule);
-    assertTrue(bestSchedule.get(0).getGrade() > worstSchedule.get(0).getGrade());
+    assertTrue(
+        bestSchedule.get(0).getGrade() > worstSchedule.get(0).getGrade());
     assertTrue(bestSchedule.get(0).compareTo(worstSchedule.get(0)) > 0);
   }
 
   @Test
-  void testGetSwitchTimeOutOfBound(){
-    Throwable e = assertThrows(IndexOutOfBoundsException.class, () -> scheduler.getSwitchTime(-1, 0));
+  void testGetSwitchTimeOutOfBound() {
+    Throwable e = assertThrows(IndexOutOfBoundsException.class,
+        () -> scheduler.getSwitchTime(-1, 0));
   }
 
   @Test
-  void testToString(){
+  void testToString() {
     assertNotNull(scheduler.toString());
   }
 

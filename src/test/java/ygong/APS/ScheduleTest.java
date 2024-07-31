@@ -137,7 +137,7 @@ class ScheduleTest {
     Schedule schedule1 = new Schedule(schedule);
     schedule1.getMachine(0).scheduleAllOrders(this.scheduler);
     schedule1.getMachine(1).scheduleAllOrders(this.scheduler);
-    schedule1.calcStat( schedule1.getMaxMakespan(), 5);
+    schedule1.calcStat(schedule1.getMaxMakespan(), 5);
     assertEquals(-1, schedule1.getGrade());
     assertEquals(1.0, schedule1.calcGradeByWeights(0, 1, 0, 0).getGrade());
 
@@ -278,7 +278,7 @@ class ScheduleTest {
     OrderWithTime o2 = new OrderWithTime(orders.get(0));
     assertEquals(o1, o2);
     assertEquals(o1.hashCode(), o2.hashCode());
-    //noinspection AssertBetweenInconvertibleTypes
+    // noinspection AssertBetweenInconvertibleTypes
     assertNotEquals(o1, orders.get(0));
     assertNotEquals(o1, null);
     assertEquals(o1, o1);
@@ -364,7 +364,7 @@ class ScheduleTest {
     OrderWithTime o2 = new OrderWithTime(orders.get(0));
     assertEquals(o1, o2);
     assertEquals(o1.hashCode(), o2.hashCode());
-    //noinspection AssertBetweenInconvertibleTypes
+    // noinspection AssertBetweenInconvertibleTypes
     assertNotEquals(o1, orders.get(0));
     assertNotEquals(o1, null);
     assertEquals(o1, o1);

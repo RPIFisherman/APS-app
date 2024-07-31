@@ -10,9 +10,7 @@ import ygong.APS.Schedule.OrderWithTime;
  * Feel free to add more rules to the class
  * </p>
  *
- * @author <a
- * href="mailto:yuyanggong.rpi@gmail.com">Yuyang
- * Gong</a>
+ * @author <a href="mailto:yuyanggong.rpi@gmail.com">Yuyang Gong</a>
  * @version 1.0
  */
 public enum Rules {
@@ -43,8 +41,9 @@ public enum Rules {
 
   // * after all order are settled
   // Other rules can be added e.g. belowCapacityInSize
+
   /**
-   * @param machine the machine will be checked
+   * @param machine   the machine will be checked
    * @param threshold lower bound of the machine capacity(unit time)
    * @return true if the machine is below the capacity
    */
@@ -56,6 +55,7 @@ public enum Rules {
 
   /**
    * Rule using the default lower bound of the machine capacity
+   *
    * @param machine the machine will be checked
    * @return true if the machine is below the capacity
    */
@@ -64,8 +64,9 @@ public enum Rules {
   }
 
   // * can be checked during and after the setting
+
   /**
-   * @param machine the machine will be checked
+   * @param machine   the machine will be checked
    * @param threshold upper bound of the machine capacity(unit time)
    * @return true if the machine is above the capacity
    */
@@ -77,6 +78,7 @@ public enum Rules {
 
   /**
    * Rule using the default upper bound of the machine capacity
+   *
    * @param machine the machine will be checked
    * @return true if the machine is above the capacity
    */
@@ -85,9 +87,10 @@ public enum Rules {
   }
 
   // * before adding the order
+
   /**
    * @param machine the machine will be checked
-   * @param order the order will be added
+   * @param order   the order will be added
    * @return true if the order fits the machine
    */
   public static boolean orderFitsMachine(MachineWithOrders machine,
@@ -98,7 +101,7 @@ public enum Rules {
 
   /**
    * @param machine the machine will be checked
-   * @param order the order will be added
+   * @param order   the order will be added
    * @return true if the order fits the machine
    */
   public static boolean orderFitsMachine(MachineWithOrders machine,

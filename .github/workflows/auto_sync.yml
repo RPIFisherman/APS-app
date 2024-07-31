@@ -1,14 +1,14 @@
 on:
   push:
-    # delete this item if you don't want to trigger this workflow when modify this repo
+  # delete this item if you don't want to trigger this workflow when modify this repo
   schedule:
     # * is a special character in YAML so you have to quote this string
     # UTC 17:00 -> CST (China) 1:00, see https://datetime360.com/cn/utc-cst-china-time/
     - cron: '0 17 * * *'
-name: Mirror GitHub Auto Queried Repos to Gitee
+name: Mirror to Gitee
 jobs:
   run:
-    name: Sync-GitHub-to-Gitee
+    # name: Sync-GitHub-to-Gitee
     runs-on: ubuntu-latest
     steps:
       - name: Mirror the Github repos to Gitee.
