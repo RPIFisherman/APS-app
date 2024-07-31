@@ -7,22 +7,50 @@ import javafx.beans.NamedArg;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
-import javafx.scene.chart.*;
+import javafx.scene.chart.Axis;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.ValueAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Rectangle;
 
+/**
+ * This GanttChart class is copied from
+ * <a href="https://stackoverflow.com/questions/27975898/gantt-chart-from-scratch">Roland</a>
+ *
+ * @param <X> X-axis type
+ * @param <Y> Y-axis type
+ *
+ * @see <a href="https://stackoverflow.com/questions/27975898/gantt-chart-from-scratch">StackOverflow</a>
+ * @author <a href="https://stackoverflow.com/users/1844265/roland">Roland</a>, <a
+ * href="mailto:yuyanggong.rpi@gmail.com">Yuyang
+ * Gong</a>
+ * @version 1.0
+ * @since 1.0
+ */
 public class GanttChart<X, Y> extends XYChart<X, Y> {
 
   private double blockHeight = 10;
 
+  /**
+   * Construct a new GanttChart with the given axis.
+   * @param xAxis X-axis of the chart
+   * @param yAxis Y-axis of the chart
+   */
   public GanttChart(@NamedArg("xAxis") Axis<X> xAxis,
-                    @NamedArg("yAxis") Axis<Y> yAxis) {
+      @NamedArg("yAxis") Axis<Y> yAxis) {
     this(xAxis, yAxis, FXCollections.observableArrayList());
   }
 
+  /**
+   * @param xAxis X-axis of the chart
+   * @param yAxis Y-axis of the chart
+   * @param data Data of the chart
+   */
   public GanttChart(@NamedArg("xAxis") Axis<X> xAxis,
-                    @NamedArg("yAxis") Axis<Y> yAxis,
-                    @NamedArg("data") ObservableList<Series<X, Y>> data) {
+      @NamedArg("yAxis") Axis<Y> yAxis,
+      @NamedArg("data") ObservableList<Series<X, Y>> data) {
     super(xAxis, yAxis);
     if (!(xAxis instanceof ValueAxis && yAxis instanceof CategoryAxis)) {
       throw new IllegalArgumentException(
@@ -32,11 +60,11 @@ public class GanttChart<X, Y> extends XYChart<X, Y> {
   }
 
   private static String getStyleClass(Object obj) {
-    return ((ExtraData)obj).getStyleClass();
+    return ((ExtraData) obj).getStyleClass();
   }
 
   private static double getLength(Object obj) {
-    return ((ExtraData)obj).getLength();
+    return ((ExtraData) obj).getLength();
   }
 
   @Override
@@ -58,25 +86,25 @@ public class GanttChart<X, Y> extends XYChart<X, Y> {
         Rectangle ellipse;
         if (block != null) {
           if (block instanceof StackPane) {
-            StackPane region = (StackPane)item.getNode();
+            StackPane region = (StackPane) item.getNode();
             if (region.getShape() == null) {
               ellipse = new Rectangle(getLength(item.getExtraValue()),
-                                      getBlockHeight());
+                  getBlockHeight());
             } else if (region.getShape() instanceof Rectangle) {
-              ellipse = (Rectangle)region.getShape();
+              ellipse = (Rectangle) region.getShape();
             } else {
               return;
             }
             ellipse.setWidth(
                 getLength(item.getExtraValue()) *
-                ((getXAxis() instanceof NumberAxis)
-                     ? Math.abs(((NumberAxis)getXAxis()).getScale())
-                     : 1));
+                    ((getXAxis() instanceof NumberAxis)
+                        ? Math.abs(((NumberAxis) getXAxis()).getScale())
+                        : 1));
             ellipse.setHeight(
                 getBlockHeight() *
-                ((getYAxis() instanceof NumberAxis)
-                     ? Math.abs(((NumberAxis)getYAxis()).getScale())
-                     : 1));
+                    ((getYAxis() instanceof NumberAxis)
+                        ? Math.abs(((NumberAxis) getYAxis()).getScale())
+                        : 1));
             y -= getBlockHeight() / 2.0;
 
             // Note: workaround for RT-7689 - saw this in ProgressControlSkin
@@ -98,31 +126,60 @@ public class GanttChart<X, Y> extends XYChart<X, Y> {
     }
   }
 
-  public double getBlockHeight() { return blockHeight; }
+  /**
+   * @return the blockHeight
+   */
+  public double getBlockHeight() {
+    return blockHeight;
+  }
 
+  /**
+   * @param blockHeight the blockHeight to set
+   */
   public void setBlockHeight(double blockHeight) {
     this.blockHeight = blockHeight;
   }
 
+  /**
+   * @param series the series to add
+   * @param itemIndex the index of the item
+   * @param item the item to add
+   *
+   * @see GanttChart#createContainer(Series, int, Data, int)
+   */
   @Override
   protected void dataItemAdded(Series<X, Y> series, int itemIndex,
-                               Data<X, Y> item) {
+      Data<X, Y> item) {
     Node block =
         createContainer(series, getData().indexOf(series), item, itemIndex);
     getPlotChildren().add(block);
   }
 
+  /**
+   * @param item the item to remove
+   * @param series the series to remove
+   */
   @Override
   protected void dataItemRemoved(final Data<X, Y> item,
-                                 final Series<X, Y> series) {
+      final Series<X, Y> series) {
     final Node block = item.getNode();
     getPlotChildren().remove(block);
     removeDataItemFromDisplay(series, item);
   }
 
+  /**
+   * @param item the item to change
+   */
   @Override
-  protected void dataItemChanged(Data<X, Y> item) {}
+  protected void dataItemChanged(Data<X, Y> item) {
+  }
 
+  /**
+   * @param series the series to change
+   * @param seriesIndex the index of the series
+   *
+   * @see GanttChart#createContainer(Series, int, Data, int)
+   */
   @Override
   protected void seriesAdded(Series<X, Y> series, int seriesIndex) {
     for (int j = 0; j < series.getData().size(); j++) {
@@ -132,6 +189,9 @@ public class GanttChart<X, Y> extends XYChart<X, Y> {
     }
   }
 
+  /**
+   * @param series the series to remove
+   */
   @Override
   protected void seriesRemoved(final Series<X, Y> series) {
     for (XYChart.Data<X, Y> d : series.getData()) {
@@ -142,7 +202,7 @@ public class GanttChart<X, Y> extends XYChart<X, Y> {
   }
 
   private Node createContainer(Series<X, Y> series, int seriesIndex,
-                               final Data<X, Y> item, int itemIndex) {
+      final Data<X, Y> item, int itemIndex) {
 
     Node container = item.getNode();
 
@@ -163,10 +223,10 @@ public class GanttChart<X, Y> extends XYChart<X, Y> {
     List<X> xData = null;
     List<Y> yData = null;
     if (xa.isAutoRanging()) {
-      xData = new ArrayList<X>();
+      xData = new ArrayList<>();
     }
     if (ya.isAutoRanging()) {
-      yData = new ArrayList<Y>();
+      yData = new ArrayList<>();
     }
     if (xData != null || yData != null) {
       for (Series<X, Y> series : getData()) {
@@ -174,7 +234,7 @@ public class GanttChart<X, Y> extends XYChart<X, Y> {
           if (xData != null) {
             xData.add(data.getXValue());
             xData.add(xa.toRealValue(xa.toNumericValue(data.getXValue()) +
-                                     getLength(data.getExtraValue())));
+                getLength(data.getExtraValue())));
           }
           if (yData != null) {
             yData.add(data.getYValue());
@@ -190,23 +250,55 @@ public class GanttChart<X, Y> extends XYChart<X, Y> {
     }
   }
 
+  /**
+   * The colored block for {@link GanttChart}
+   */
   public static class ExtraData {
 
+    /**
+     * Length of the data
+     */
     public double length;
+
+    /**
+     * the style string of the data, see the src/main/resources/ganttchart.css
+     */
     public String styleClass;
 
-    public ExtraData(double lengthMs, String styleClass) {
+    /**
+     * @param length the length of the data
+     * @param styleClass the style string
+     */
+    public ExtraData(double length, String styleClass) {
       super();
-      this.length = lengthMs;
+      this.length = length;
       this.styleClass = styleClass;
     }
 
-    public double getLength() { return length; }
+    /**
+     * @return the length of the block
+     */
+    public double getLength() {
+      return length;
+    }
 
-    public void setLength(double length) { this.length = length; }
+    /**
+     * @param length the length to be set
+     */
+    public void setLength(double length) {
+      this.length = length;
+    }
 
-    public String getStyleClass() { return styleClass; }
+    /**
+     * @return the styleClass
+     */
+    public String getStyleClass() {
+      return styleClass;
+    }
 
+    /**
+     * @param styleClass the styleClass to set
+     */
     public void setStyleClass(String styleClass) {
       this.styleClass = styleClass;
     }

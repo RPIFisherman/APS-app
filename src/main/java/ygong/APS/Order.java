@@ -1,91 +1,175 @@
 // Helper class for Orders
 package ygong.APS;
 
-public class Order implements Cloneable {
+/**
+ * This class represents an order in the APS system. An order is a task that
+ * needs to be scheduled in the production environment.
+ * <p>An order has a name, an order ID,
+ * a quantity, a production type ID, an earliest start time, a delivery time,
+ * and a latest due time. The order ID is unique and is used as the hashcode for
+ * the order. The order class is used by the scheduler to schedule orders in the
+ * production environment.
+ * </p>
+ *
+ * <dl>
+ *   <dt>Order has following constraints:</dt>
+ *   <dd>1. earliest_start_time &le; delivery_time &le; latest_due_time</dd>
+ *   <dd>2. quantity &gt; 0</dd>
+ *   <dt>{@link Schedule.Grade} will check(as soft-bounds, not hard-requirements) to give a score:</dt>
+ *   <dd>1. earliest_start_time: the time when the order can start</dd>
+ *   <dd>2. delivery_time: the time when the order is delivered</dd>
+ *   <dd>3. latest_due_time: the latest time when the order can be delivered</dd>
+ * </dl>
+ *
+ * @author <a href="mailto:yuyanggong.rpi@gmail.com">Yuyang Gong</a>
+ * @version 1.0
+ * @see Schedule.OrderWithTime
+ * @see Schedule.Grade
+ */
+public class Order {
 
-  final int earliest_start_time;
-  final int delivery_time;
-  final int latest_due_time;
-  private final String _name;
-  private final int _order_id;
-  private final int _quantity;
-  private final int _production_type_id;
-  protected Machine machine;
-  protected String status;
-  int start_time;
-  int end_time;
+  /**
+   * Order name, can be any string, just use for toString method
+   *
+   * @see Order#toString()
+   */
+  protected final String name;
 
-  public Order(String name, int order_id, int quantity, int production_type_id,
-               int earliest_start_time, int delivery_time, int latest_due_time,
-               int start_time, int end_time, Machine machine, String status)
+  /**
+   * Order ID, unique ID <strong>STONGLY RECOMMENDED</strong>
+   * <br> Used as the hashCode
+   *
+   * @see Order#hashCode()
+   */
+  protected final int order_ID;
+
+  /**
+   * earliest starting time, the time when the order can start
+   */
+  protected final int earliest_start_time;
+
+  /**
+   * delivery time, the time when the order is delivered
+   */
+  protected final int delivery_time;
+
+  /**
+   * latest due time, the latest time when the order can be delivered
+   */
+  protected final int latest_due_time;
+
+  /**
+   * quantity of the order
+   */
+  protected final int quantity;
+
+  /**
+   * production type ID, used to identify the production type
+   */
+  protected final int production_type_ID;
+
+  /**
+   * Constructor for Order
+   *
+   * @param name                order name
+   * @param order_ID            order ID
+   * @param quantity            quantity of the order
+   * @param production_type_ID  production type ID
+   * @param earliest_start_time earliest starting time
+   * @param delivery_time       delivery time
+   * @param latest_due_time     latest due time
+   * @throws AssertionError if order is invalid
+   */
+  public Order(String name, int order_ID, int quantity, int production_type_ID,
+      int earliest_start_time, int delivery_time, int latest_due_time)
       throws AssertionError {
-    assert earliest_start_time <= delivery_time &&
-        delivery_time <= latest_due_time;
-    this._name = name;
-    this._order_id = order_id;
-    this._quantity = quantity;
-    this._production_type_id = production_type_id;
+    assert earliest_start_time <= delivery_time
+        && delivery_time <= latest_due_time;
+    assert quantity > 0;
+    this.name = name;
+    this.order_ID = order_ID;
+    this.quantity = quantity;
+    this.production_type_ID = production_type_ID;
     this.earliest_start_time = earliest_start_time;
     this.delivery_time = delivery_time;
     this.latest_due_time = latest_due_time;
-    this.start_time = start_time;
-    this.end_time = end_time;
-    this.machine = machine;
-    this.status = status;
   }
 
+  /**
+   * Copy constructor for Order
+   * @param o Order to copy
+   */
   public Order(Order o) {
-    this._name = o._name;
-    this._order_id = o._order_id;
-    this._quantity = o._quantity;
-    this._production_type_id = o._production_type_id;
+    this.name = o.name;
+    this.order_ID = o.order_ID;
+    this.quantity = o.quantity;
+    this.production_type_ID = o.production_type_ID;
     this.earliest_start_time = o.earliest_start_time;
     this.delivery_time = o.delivery_time;
     this.latest_due_time = o.latest_due_time;
-    this.start_time = o.start_time;
-    this.end_time = o.end_time;
-    this.machine = o.machine;
-    this.status = o.status;
   }
 
-  public int getOrderId() { return _order_id; }
-
-  public int getQuantity() { return _quantity; }
-
-  public int getProductionTypeId() { return _production_type_id; }
-
-  private int statusCheck() {
-    if (start_time < 0 || end_time < 0) {
-      throw new IllegalStateException("Start time and end time must be set");
-    } else if (start_time >= earliest_start_time && end_time <= delivery_time) {
-      status = OrderStatus.GREEN;
-      return OrderStatus.GREEN_CODE;
-    } else if (end_time > latest_due_time) {
-      status = OrderStatus.RED;
-      return OrderStatus.RED_CODE;
-    } else if (start_time < earliest_start_time) {
-      status = OrderStatus.EST_VIOLATE;
-      return OrderStatus.EST_VIOLATE_CODE;
-    } else {
-      status = OrderStatus.DELIVERY_VIOLATE;
-      return OrderStatus.DELIVERY_VIOLATE_CODE;
-    }
+  /**
+   * @return order name
+   */
+  public String getName() {
+    return name;
   }
 
+  /**
+   * @return order ID
+   */
+  public int getOrderID() {
+    return order_ID;
+  }
+
+  /**
+   * @return earliest starting time
+   */
+  public int getEarliestStartTime() {
+    return earliest_start_time;
+  }
+
+  /**
+   * @return delivery time
+   */
+  public int getDeliveryTime() {
+    return delivery_time;
+  }
+
+  /**
+   * @return latest due time
+   */
+  public int getLatestDueTime() {
+    return latest_due_time;
+  }
+
+  /**
+   * @return quantity of the order
+   */
+  public int getQuantity() {
+    return quantity;
+  }
+
+  /**
+   * @return production type ID
+   */
+  public int getProductionTypeID() {
+    return production_type_ID;
+  }
+
+  /**
+   * @return hashCode of the order, which is the order ID
+   */
   @Override
-  public String toString() {
-    return "Order ID: " + _order_id + " Quantity: " + _quantity;
+  public int hashCode() {
+    return order_ID;
   }
 
-  @Override
-  public Order clone() throws AssertionError {
-    try {
-      return (Order)super.clone();
-    } catch (CloneNotSupportedException e) {
-      throw new AssertionError("Order clone failed");
-    }
-  }
-
+  /**
+   * @param o object to compare
+   * @return true if the order ID is the same
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -94,91 +178,16 @@ public class Order implements Cloneable {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    Order order = (Order)o;
-    return _order_id == order._order_id;
+    Order order = (Order) o;
+    return order_ID == order.order_ID;
   }
 
+  /**
+   * @return string representation of the order
+   */
   @Override
-  public int hashCode() {
-    return _order_id;
-  }
-
-  public void updateStatus() { statusCheck(); }
-
-  public int setStartEndTime(final int start_time, final int end_time)
-      throws AssertionError {
-    assert start_time < end_time : "Start time must be less than end time";
-    assert start_time >= 0 : "Start time must be non-negative";
-    this.start_time = start_time;
-    this.end_time = end_time;
-    updateStatus();
-    return end_time;
-  }
-
-  public int getEarliestStartTime() { return earliest_start_time; }
-
-  public int getLatestDueTime() { return latest_due_time; }
-
-  public static final class OrderStatus {
-    public static final String GREEN = "normal";
-    public static final int GREEN_CODE = 0;
-    public static final String RED = "ldt violate";
-    public static final int RED_CODE = -1;
-    public static final String EST_VIOLATE = "est violate";
-    public static final int EST_VIOLATE_CODE = -2;
-    public static final String DELIVERY_VIOLATE = "delivery violate";
-    public static final int DELIVERY_VIOLATE_CODE = -3;
-
-    private static String code2Status(int code)
-        throws IllegalArgumentException {
-      switch (code) {
-      case GREEN_CODE:
-        return GREEN;
-      case RED_CODE:
-        return RED;
-      case EST_VIOLATE_CODE:
-        return EST_VIOLATE;
-      case DELIVERY_VIOLATE_CODE:
-        return DELIVERY_VIOLATE;
-      default:
-        throw new IllegalArgumentException("Invalid code");
-      }
-    }
-
-    private static int status2Code(String status)
-        throws IllegalArgumentException {
-      switch (status) {
-      case GREEN:
-        return GREEN_CODE;
-      case RED:
-        return RED_CODE;
-      case EST_VIOLATE:
-        return EST_VIOLATE_CODE;
-      case DELIVERY_VIOLATE:
-        return DELIVERY_VIOLATE_CODE;
-      default:
-        throw new IllegalArgumentException("Invalid status: " + status);
-      }
-    }
-
-    static String chooseColor(String status) throws IllegalArgumentException {
-      switch (status) {
-      case GREEN:
-        return "status-green";
-      case RED:
-        return "status-red";
-      case EST_VIOLATE:
-        return "status-est-violate";
-      case DELIVERY_VIOLATE:
-        return "status-deli-violate";
-      default:
-        throw new IllegalArgumentException("Invalid status: " + status);
-      }
-    }
-
-    private static String chooseColor(int code)
-        throws IllegalArgumentException {
-      return chooseColor(code2Status(code));
-    }
+  public String toString() {
+    return "Order: " + name + " Order ID: " + order_ID + " Quantity: "
+        + quantity;
   }
 }

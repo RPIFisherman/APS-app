@@ -1,0 +1,243 @@
+@startuml
+
+/' diagram meta data start
+config=CallConfiguration;
+{
+  "rootMethod": "APSDemo#start(Stage)",
+  "projectClassification": {
+    "searchMode": "OpenProject", // OpenProject, AllProjects
+    "includedProjects": "",
+    "pathEndKeywords": "*.impl",
+    "isClientPath": "",
+    "isClientName": "",
+    "isTestPath": "",
+    "isTestName": "",
+    "isMappingPath": "",
+    "isMappingName": "",
+    "isDataAccessPath": "",
+    "isDataAccessName": "",
+    "isDataStructurePath": "",
+    "isDataStructureName": "",
+    "isInterfaceStructuresPath": "",
+    "isInterfaceStructuresName": "",
+    "isEntryPointPath": "",
+    "isEntryPointName": "",
+    "treatFinalFieldsAsMandatory": false
+  },
+  "graphRestriction": {
+    "classPackageExcludeFilter": "",
+    "classPackageIncludeFilter": "",
+    "classNameExcludeFilter": "",
+    "classNameIncludeFilter": "",
+    "methodNameExcludeFilter": "",
+    "methodNameIncludeFilter": "",
+    "removeByInheritance": "", // inheritance/annotation based filtering is done in a second step
+    "removeByAnnotation": "",
+    "removeByClassPackage": "", // cleanup the graph after inheritance/annotation based filtering is done
+    "removeByClassName": "",
+    "cutMappings": false,
+    "cutEnum": true,
+    "cutTests": true,
+    "cutClient": true,
+    "cutDataAccess": true,
+    "cutInterfaceStructures": true,
+    "cutDataStructures": true,
+    "cutGetterAndSetter": true,
+    "cutConstructors": true
+  },
+  "graphTraversal": {
+    "forwardDepth": 3,
+    "backwardDepth": 3,
+    "classPackageExcludeFilter": "",
+    "classPackageIncludeFilter": "",
+    "classNameExcludeFilter": "",
+    "classNameIncludeFilter": "",
+    "methodNameExcludeFilter": "",
+    "methodNameIncludeFilter": "",
+    "hideMappings": false,
+    "hideDataStructures": false,
+    "hidePrivateMethods": true,
+    "hideInterfaceCalls": true, // indirection: implementation -> interface (is hidden) -> implementation
+    "onlyShowApplicationEntryPoints": false, // root node is included
+    "useMethodCallsForStructureDiagram": "ForwardOnly" // ForwardOnly, BothDirections, No
+  },
+  "details": {
+    "aggregation": "GroupByClass", // ByClass, GroupByClass, None
+    "showMethodParametersTypes": false,
+    "showMethodParametersNames": false,
+    "showMethodReturnType": false,
+    "showPackageLevels": 2,
+    "showCallOrder": false,
+    "edgeMode": "MethodsOnly", // TypesOnly, MethodsOnly, TypesAndMethods, MethodsAndDirectTypeUsage
+    "showDetailedClassStructure": false
+  },
+  "rootClass": "APSDemo",
+  "extensionCallbackMethod": "" // qualified.class.name#methodName - signature: public static String method(String)
+}
+diagram meta data end '/
+
+
+
+digraph g {
+    rankdir="LR"
+    splines=polyline
+    
+
+'nodes 
+subgraph cluster_65028 { 
+   	label=APS
+	labeljust=l
+	fillcolor="#ececec"
+	style=filled
+   
+   subgraph cluster_1272847639 { 
+   	label=Machine
+	labeljust=l
+	fillcolor=white
+	style=filled
+   
+   Machine1858361680XXXcheckViableOrder104431[
+	label="+ checkViableOrder()"
+	style=filled
+	fillcolor=white
+	tooltip="Machine
+
+&#10;  Check if the product type can be produced on the machine&#10; &#10;  @param production_type_ID ID of the \<strong\>production type\</strong\>,&#10;  @return return true if the product type can be produced on the machine&#10;  @apiNote production ID is \<strong\>NOT\</strong\> the order ID&#10; "
+	fontcolor=darkgreen
+];
+
+Machine1858361680XXXgetProductionPace104431[
+	label="+ getProductionPace()"
+	style=filled
+	fillcolor=white
+	tooltip="Machine
+
+&#10;  get the production pace f the specific production type&#10; &#10;  @param production_type_id ID of the \<strong\>production type\</strong\>,&#10;  @return return the pace per hour of given production type. return -1 if not&#10;  found the production type&#10;  @apiNote production ID is \<strong\>NOT\</strong\> the order ID&#10; "
+	fontcolor=darkgreen
+];
+} 
+
+subgraph cluster_1316370379 { 
+   	label=Schedule
+	labeljust=l
+	fillcolor=white
+	style=filled
+   
+   Schedule1858361680XXXcalcGradeByWeights1777557836[
+	label="+ calcGradeByWeights()"
+	style=filled
+	fillcolor=white
+	tooltip="Schedule
+
+&#10;  Calculate the Grade based on the weights and stats calculated before.&#10;  \<p\>\<strong\>call {@link Schedule#calcStat(double, int)}\</strong\> first to&#10;  make sure the stats are correctly calculated!&#10;  \</p\>&#10; &#10;  @param on_time_weight weight for the on time percentage&#10;  @param makespan_weight weight for the makespan percentage&#10;  @param est_weight weight for the earliest start time percentage&#10;  @param ldt_weight weight for the latest due time percentage&#10;  @return the Grade with percentage&#10;  @note we can have weights in any kind of size&#10;  @see Grade#calcGradeByWeights(int, int, int, int)&#10;  @see Grade&#10; "
+	fontcolor=darkgreen
+];
+
+Schedule1858361680XXXgetMachine104431[
+	label="+ getMachine()"
+	style=filled
+	fillcolor=white
+	tooltip="Schedule
+
+&#10;  @param i the index of the machine&#10;  @return the machine at index i&#10;  @throws IndexOutOfBoundsException if the index is out of bounds&#10; "
+	fontcolor=darkgreen
+];
+} 
+
+subgraph cluster_2142191325 { 
+   	label=Scheduler
+	labeljust=l
+	fillcolor=white
+	style=filled
+   
+   Scheduler1858361680XXXcalcAllSchedulesGrade79535248[
+	label="+ calcAllSchedulesGrade()"
+	style=filled
+	fillcolor=white
+	tooltip="Scheduler
+
+&#10;  Calculate the grade for all schedules based on the weights given&#10; &#10;  @param weights the weights for on_time, makespan, est_violate, ldt_violate.&#10; if not given, the default weights are used: on_time: 40,&#10; makespan: 30, est_violate: 15, ldt_violate: 15&#10;  @apiNote The Schedules will be sorted by grade in descending order after&#10;  the call&#10;  @see Schedule#calcGradeByWeights(int, int, int, int)&#10; "
+	fontcolor=darkgreen
+];
+
+Scheduler1858361680XXXcreateChart633276745[
+	label="+ createChart()"
+	style=filled
+	fillcolor=white
+	tooltip="Scheduler
+
+&#10;  Create a GanttChart of the schedule&#10; &#10;  @param schedule the schedule to be displayed&#10;  @return the {@link GanttChart} of the schedule&#10;  @apiNote we need the Scheduler to calculate the switch time between&#10;  different order types, so it is not static&#10; "
+	fontcolor=darkgreen
+];
+
+Scheduler1858361680XXXgenerateAllPossible0[
+	label="+ generateAllPossible()"
+	style=filled
+	fillcolor=white
+	tooltip="Scheduler
+
+&#10;  Generate all possible schedules&#10;  \<p\>&#10;  Generate all possible schedules by DFS and store them in the _schedules&#10;  list&#10;  \</p\>&#10; &#10;  @see Scheduler#depthFirstSearch(int, Schedule)&#10; "
+	fontcolor=darkgreen
+];
+
+Scheduler1858361680XXXgetBestSchedule104431[
+	label="+ getBestSchedule()"
+	style=filled
+	fillcolor=white
+	tooltip="Scheduler
+
+&#10;  @param num if num is positive, return the first num schedules; if num is&#10; negative, return the last num schedules; if num is zero, return&#10; all schedules&#10;  @return the list of the best schedules&#10;  @apiNote Need to first call&#10;  {@link Scheduler#calcAllSchedulesGrade(Integer...)} to get a sorted list of&#10;  schedules otherwise is just a list of schedules!&#10;  @see Scheduler#calcAllSchedulesGrade(Integer...)&#10;  @see Schedule#scheduleAllOrders(Scheduler)&#10; "
+	fontcolor=darkgreen
+];
+
+Scheduler1858361680XXXinitRandom1503934682[
+	label="+ initRandom()"
+	style=filled
+	fillcolor=white
+	tooltip="Scheduler
+
+&#10;  The init method to initialize the Scheduler with random orders and machines&#10;  just use for demo/test&#10; &#10;  @param num_order_types the number of order types&#10;  @param num_machines the number of machines&#10;  @param num_orders the number of orders&#10;  @param max_units_allowedthe maximum units allowed for all orders to&#10;  be scheduled&#10;  @param max_capacity_per_machine the maximum capacity that can be Overload&#10;  on a machine&#10;  @param min_capacity_per_machine the minimum capacity that a machine can&#10;  work&#10;  @param seed the random seed&#10;  @throws AssertionError if the number of order types, machines, orders, max&#10; units allowed, max capacity per machine, min&#10; capacity per machine is less than or equal to zero&#10; or the max capacity per machine is less than the min&#10; capacity per machine&#10;  @see Scheduler#init(int, int, int, int, double, double, ArrayList,&#10;  ArrayList, ArrayList)&#10; "
+	fontcolor=darkgreen
+];
+} 
+} 
+
+subgraph cluster_72692217 { 
+   	label=APSDemo
+	labeljust=l
+	fillcolor="#ececec"
+	style=filled
+   
+   subgraph cluster_1996272928 { 
+   	label=APSDemo
+	labeljust=l
+	fillcolor=white
+	style=filled
+   
+   APSDemo72692217XXXstart80204510[
+	label="+ start()"
+	style=filled
+	fillcolor=white
+	tooltip="APSDemo
+
+&#10;  The main demo method for the ygong.APSDemo application&#10;  @param stage the primary stage for this application&#10; "
+	penwidth=4
+	fontcolor=darkgreen
+];
+} 
+} 
+
+'edges    
+APSDemo72692217XXXstart80204510 -> Scheduler1858361680XXXinitRandom1503934682;
+APSDemo72692217XXXstart80204510 -> Scheduler1858361680XXXcalcAllSchedulesGrade79535248;
+APSDemo72692217XXXstart80204510 -> Scheduler1858361680XXXcreateChart633276745;
+APSDemo72692217XXXstart80204510 -> Scheduler1858361680XXXgenerateAllPossible0;
+APSDemo72692217XXXstart80204510 -> Scheduler1858361680XXXgetBestSchedule104431;
+Scheduler1858361680XXXcalcAllSchedulesGrade79535248 -> OrderWithTime1316370379XXXstatusCheck0;
+Scheduler1858361680XXXcalcAllSchedulesGrade79535248 -> Schedule1858361680XXXcalcGradeByWeights1777557836;
+Scheduler1858361680XXXgenerateAllPossible0 -> Machine1858361680XXXcheckViableOrder104431;
+Scheduler1858361680XXXgenerateAllPossible0 -> Machine1858361680XXXgetProductionPace104431;
+Scheduler1858361680XXXgenerateAllPossible0 -> Schedule1858361680XXXgetMachine104431;
+    
+}
+@enduml
