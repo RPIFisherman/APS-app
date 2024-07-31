@@ -70,13 +70,18 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.8.0</version>
+                <version>3.6.2</version>
                 <configuration>
                     <tags>
                         <tag>
                             <name>note</name>
                             <placement>a</placement>
                             <head>Note:</head>
+                        </tag>
+                        <tag>
+                            <name>apiNote</name>
+                            <placement>a</placement>
+                            <head>API Note:</head>
                         </tag>
                     </tags>
                 </configuration>
