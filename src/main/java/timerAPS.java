@@ -1,4 +1,3 @@
-import java.lang.instrument.Instrumentation;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
@@ -12,8 +11,27 @@ import ygong.APS.Scheduler;
  */
 class timerAPS {
 
+
   public static void main(String[] args) {
 
+    Scheduler scheduler = getScheduler();
+    List<Schedule> schedules = scheduler.getSchedules();
+    List<Schedule> best_schedules = scheduler.getBestSchedule(10);
+    System.out.println(schedules.size());
+
+    // total memory
+    Runtime runtime = Runtime.getRuntime();
+    long memory = runtime.totalMemory() - runtime.freeMemory();
+    System.out.println("Memory Usage: " + memory / 1024 / 1024 + "MB");
+    MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
+    MemoryUsage heapMemoryUsage = memoryBean.getHeapMemoryUsage();
+    System.out.println(
+        "Heap Memory Usage: " + heapMemoryUsage.getUsed() / 1024 / 1024
+            + "MB");
+
+  }
+
+  private static Scheduler getScheduler() {
     Scheduler scheduler = new Scheduler();
     int[] weights = {40, 30, 10, 10};
 
@@ -28,24 +46,7 @@ class timerAPS {
     // parallel branch
     scheduler.calcAllSchedulesGrade(weights[0], weights[1], weights[2],
         weights[3]);
-    List<Schedule> schedules = scheduler.getSchedules();
-    List<Schedule> best_schedules = scheduler.getBestSchedule(10);
-    System.out.println(schedules.size());
-    // System.out.println(best_schedules.size());
-    // for (int i = 0; i < best_schedules.size(); i++) {
-    //   System.out.println(best_schedules.get(i).getGrade());
-    // }
-
-    // total memory
-    Runtime runtime = Runtime.getRuntime();
-    long memory = runtime.totalMemory() - runtime.freeMemory();
-    System.out.println("Memory Usage: " + memory / 1024 / 1024 + "MB");
-    MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
-    MemoryUsage heapMemoryUsage = memoryBean.getHeapMemoryUsage();
-    System.out.println(
-        "Heap Memory Usage: " + heapMemoryUsage.getUsed() / 1024 / 1024
-            + "MB");
-
+    return scheduler;
   }
 
 }

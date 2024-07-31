@@ -117,7 +117,7 @@ class ScheduleTest {
     assertEquals(-1, schedule.getGrade());
     assertEquals(0, schedule.calcGradeByWeights(0, 1, 0, 0).getGrade());
 
-    // if the make_span is 3 times higher than current schedule, it will goes to negative points
+    // if the make_span is 3 times higher than current schedule, it will go to negative points
     schedule.calcStat(schedule.getMaxMakespan() / 3, 5);
     assertEquals(-1.0, schedule.calcGradeByWeights(0, 1, 0, 0).getGrade());
 
@@ -278,6 +278,7 @@ class ScheduleTest {
     OrderWithTime o2 = new OrderWithTime(orders.get(0));
     assertEquals(o1, o2);
     assertEquals(o1.hashCode(), o2.hashCode());
+    //noinspection AssertBetweenInconvertibleTypes
     assertNotEquals(o1, orders.get(0));
     assertNotEquals(o1, null);
     assertEquals(o1, o1);
@@ -301,4 +302,73 @@ class ScheduleTest {
         new OrderWithTime(orders.get(0))));
     assertTrue(aboveCapacity(schedule.getMachine(0), 0.0));
   }
+
+  @Test
+  void getStartTime() {
+    OrderWithTime o = new OrderWithTime(orders.get(0));
+    o.setStartEndTime(0.0, 1.0);
+    assertEquals(0, o.getStartTime());
+  }
+
+  @Test
+  void getEndTime() {
+    OrderWithTime o = new OrderWithTime(orders.get(0));
+    o.setStartEndTime(0.0, 1.0);
+    assertEquals(1, o.getEndTime());
+  }
+
+  @Test
+  void getProductionTypeID() {
+    OrderWithTime o = new OrderWithTime(orders.get(0));
+    assertEquals(1, o.getProductionTypeID());
+  }
+
+  @Test
+  void getOrderID() {
+    OrderWithTime o = new OrderWithTime(orders.get(0));
+    assertEquals(1, o.getOrderID());
+  }
+
+  @Test
+  void getColorCode() {
+    OrderWithTime o = new OrderWithTime(orders.get(0));
+    assertEquals("status-green", o.getColorCode());
+  }
+
+  @Test
+  void testSetStartEndTime() {
+    Error e = assertThrows(AssertionError.class, () -> {
+      OrderWithTime o = new OrderWithTime(orders.get(0));
+      o.setStartEndTime(1.0, 0.0);
+    });
+    assertEquals("Start time must be less than end time", e.getMessage());
+
+    e = assertThrows(AssertionError.class, () -> {
+      OrderWithTime o = new OrderWithTime(orders.get(0));
+      o.setStartEndTime(-1.0, 0.0);
+    });
+    assertEquals("Start time must be non-negative", e.getMessage());
+  }
+
+  @Test
+  void statusCheck() {
+    OrderWithTime o = new OrderWithTime(orders.get(0));
+    IllegalStateException e = assertThrows(IllegalStateException.class,
+        o::statusCheck);
+    assertEquals("Start time and end time must be set", e.getMessage());
+  }
+
+  @Test
+  void testEquals() {
+    OrderWithTime o1 = new OrderWithTime(orders.get(0));
+    OrderWithTime o2 = new OrderWithTime(orders.get(0));
+    assertEquals(o1, o2);
+    assertEquals(o1.hashCode(), o2.hashCode());
+    //noinspection AssertBetweenInconvertibleTypes
+    assertNotEquals(o1, orders.get(0));
+    assertNotEquals(o1, null);
+    assertEquals(o1, o1);
+
+  }
+
 }

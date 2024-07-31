@@ -8,8 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -29,19 +27,19 @@ import org.testfx.framework.junit5.Start;
  */
 class SchedulerTest {
 
-  static int num_order_types = 3;
-  static int num_machines = 2;
-  static int num_orders = 10;
-  static int max_hours = 20;
-  static double max_capacity = 1.3;
-  static double min_capacity = 0.50;
-  static int seed = 1337;
+  static final int num_order_types = 3;
+  static final int num_machines = 2;
+  static final int num_orders = 10;
+  static final int max_units = 20;
+  static final double max_capacity = 1.3;
+  static final double min_capacity = 0.50;
+  static final int seed = 1337;
   Scheduler scheduler;
 
   @BeforeEach
   void setUp() {
     scheduler = new Scheduler();
-    scheduler.initRandom(num_order_types, num_machines, num_orders, max_hours,
+    scheduler.initRandom(num_order_types, num_machines, num_orders, max_units,
         max_capacity, min_capacity, seed);
   }
 
@@ -74,7 +72,7 @@ class SchedulerTest {
 
     // test lose bound
     scheduler = new Scheduler();
-    scheduler.initRandom(num_order_types, num_machines, num_orders, max_hours,
+    scheduler.initRandom(num_order_types, num_machines, num_orders, max_units,
         3.0, 0.0, seed);
     scheduler.generateAllPossible();
     schedules = scheduler.getSchedules();
@@ -88,7 +86,7 @@ class SchedulerTest {
 
     // test Max Capacity upper bound
     scheduler = new Scheduler();
-    scheduler.initRandom(num_order_types, num_machines, num_orders, max_hours,
+    scheduler.initRandom(num_order_types, num_machines, num_orders, max_units,
         min_capacity + 0.0001, min_capacity, seed);
     scheduler.generateAllPossible();
     schedules = scheduler.getSchedules();
@@ -96,7 +94,7 @@ class SchedulerTest {
 
     // test Min Capacity lower bound
     scheduler = new Scheduler();
-    scheduler.initRandom(num_order_types, num_machines, num_orders, max_hours,
+    scheduler.initRandom(num_order_types, num_machines, num_orders, max_units,
         max_capacity, max_capacity-0.0000001, seed);
     scheduler.generateAllPossible();
     schedules = scheduler.getSchedules();
@@ -119,9 +117,27 @@ class SchedulerTest {
 
     // get the best schedule
     List<Schedule> sortedSchedules = scheduler.getBestSchedule(0);
+    List<Schedule> sortedAllSchedules = scheduler.getBestSchedule();
     for (int i = 0; i < sortedSchedules.size(); i++) {
       assertEquals(sortedSchedules.get(i), schedules.get(i));
+      assertEquals(sortedAllSchedules.get(i), schedules.get(i));
     }
+
+    List<Schedule> bestSchedule = scheduler.getBestSchedule(1);
+    List<Schedule> worstSchedule = scheduler.getBestSchedule(-1);
+    assertNotEquals(bestSchedule, worstSchedule);
+    assertTrue(bestSchedule.get(0).getGrade() > worstSchedule.get(0).getGrade());
+    assertTrue(bestSchedule.get(0).compareTo(worstSchedule.get(0)) > 0);
+  }
+
+  @Test
+  void testGetSwitchTimeOutOfBound(){
+    Throwable e = assertThrows(IndexOutOfBoundsException.class, () -> scheduler.getSwitchTime(-1, 0));
+  }
+
+  @Test
+  void testToString(){
+    assertNotNull(scheduler.toString());
   }
 
   @Nested
@@ -131,7 +147,7 @@ class SchedulerTest {
     @Start
     void start(Stage stage) {
       scheduler = new Scheduler();
-      scheduler.initRandom(num_order_types, num_machines, num_orders, max_hours,
+      scheduler.initRandom(num_order_types, num_machines, num_orders, max_units,
           max_capacity, min_capacity, seed);
       scheduler.generateAllPossible();
 

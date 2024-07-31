@@ -28,10 +28,12 @@ Thanks to [Roland's Gantt Plot code](https://stackoverflow.com/questions/2797589
 
 ## Requirements
 
-- Java 21 or above is recommended. Otherwise need to change some of the code to make it compatible with Java 8. See ``NOTE`` tags in the code.
-- Maven 3. I test with mave
+- Java 21 or above is recommended. Otherwise, need to change some of the code to make it compatible with Java 8. See ``NOTE`` tags in the code.
+- Maven 3. I test with maven
 
 ## Project Structure:
-![Project Structure](structure.png)
+
+[//]: # (TODO)
+[//]: # (![Project Structure]&#40;structure.png&#41;)
 
 ## Output Demo:

@@ -37,7 +37,9 @@ import ygong.APS.Scheduler;
  *   Feel free to modify the weights and the random data generation in the
  *   {@link #start(Stage)} method to see different results. Have fun!
  *
- * @author <a href="mailto:yuyanggong.rpi@gmail.com"> Yuyang Gong</a>
+ * @author <a
+ * href="mailto:yuyanggong.rpi@gmail.com">Yuyang
+ * Gong</a>
  * @version 1.0
  */
 public class APSDemo extends Application {
@@ -63,8 +65,7 @@ public class APSDemo extends Application {
 
       // Init random data
       // scheduler.initRandom(3, 2, 20, 40, 1.25, 0.8, 1337);
-      // NOTE:need -Xmx8g for following test, takes a loooooong time
-      // scheduler.initRandom(3, 3, 30, 40, 1.05, 1.0, 1337);
+      scheduler.initRandom(3, 3, 20, 30, 1.05, 1.0, 1337);
 
       long startTime = System.nanoTime();
 
@@ -159,6 +160,11 @@ public class APSDemo extends Application {
     });
   }
 
+  /**
+   * Show the weight input window
+   * @param stage stage for the input window
+   * @param onWeightsSubmitted callback for when the weights are submitted
+   */
   private void showWeightInputWindow(Stage stage,
       Consumer<int[]> onWeightsSubmitted) {
     // Create the form for weight inputs

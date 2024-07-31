@@ -1,3 +1,4 @@
+#file: noinspection Annotator
 name: Qodana
 on:
   workflow_dispatch:
