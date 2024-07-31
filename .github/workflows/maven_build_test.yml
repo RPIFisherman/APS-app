@@ -2,31 +2,45 @@ name: Build and Test
 
 on:
   push:
+    branches:
+      - main
+      - 'releases/**'
+  pull_request:
+    branches:
+      - main
+
 jobs:
   build-and-test-windows:
     runs-on: windows-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Set up JDK 21
-      uses: actions/setup-java@v1
-      with:
-        java-version: '1.8'
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
 
+      - name: Set up JavaFX environment
+        run: |
+          echo "JAVA_HOME environment variable set to $JAVA_HOME"
+          echo "Downloading JavaFX SDK"
+          Invoke-WebRequest -Uri "https://download2.gluonhq.com/openjfx/21.0.4/openjfx-21.0.4_windows-x64_bin-sdk.zip" -OutFile "javafx-sdk.zip"
+          Expand-Archive -Path "javafx-sdk.zip" -DestinationPath "$Env:GITHUB_WORKSPACE"
+          $Env:PATH += ";$Env:GITHUB_WORKSPACE\javafx-sdk-21.0.4\bin"
 
-    - name: Build with Maven
-      run: mvn clean install
-#      env:
-#        MAVEN_OPTS: "-Dmaven.multiModuleProjectDirectory=$GITHUB_WORKSPACE -Djansi.passthrough=true -Dmaven.home=$MAVEN_HOME -Dclassworlds.conf=$MAVEN_HOME/bin/m2.conf -Dmaven.ext.class.path=$MAVEN_HOME/lib/maven-event-listener.jar -Dfile.encoding=UTF-8 -Dsun.stdout.encoding=UTF-8 -Dsun.stderr.encoding=UTF-8"
+      - name: Build with Maven
+        run: mvn clean install
 
-    - name: Run tests with Maven
-      run: mvn test
-#      env:
-#        MAVEN_OPTS: "-Dmaven.multiModuleProjectDirectory=$GITHUB_WORKSPACE -Djansi.passthrough=true -Dmaven.home=$MAVEN_HOME -Dclassworlds.conf=$MAVEN_HOME/bin/m2.conf -Dmaven.ext.class.path=$MAVEN_HOME/lib/maven-event-listener.jar -Dfile.encoding=UTF-8 -Dsun.stdout.encoding=UTF-8 -Dsun.stderr.encoding=UTF-8"
+      - name: Run tests with Maven
+        run: mvn test
 
-    - name: Upload coverage reports to Codecov
-      uses: codecov/codecov-action@v4.0.1
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4.0.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./target/site/jacoco/jacoco.xml
+          flags: unittests
+          name: codecov-umbrella
