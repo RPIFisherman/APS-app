@@ -20,7 +20,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           distribution: 'adopt'
-          java-version: '8'
+          java-version: '21'
           cache: 'maven'
 
       - name: 'Define Qodana Profile'
@@ -28,7 +28,7 @@ jobs:
           echo "version: \"1.0\"
           profile:
             name: qodana.recommended
-          projectJDK: 8" > qodana.yaml
+          projectJDK: 21" > qodana.yaml
 
       - name: 'Run Tests'
         run: mvn test
