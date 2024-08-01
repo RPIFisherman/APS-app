@@ -145,7 +145,6 @@ public class GanttChart<X, Y> extends XYChart<X, Y> {
    * @param series    the series to add
    * @param itemIndex the index of the item
    * @param item      the item to add
-   * @see GanttChart#createContainer(Series, int, Data, int)
    */
   @Override
   protected void dataItemAdded(Series<X, Y> series, int itemIndex,
@@ -177,7 +176,6 @@ public class GanttChart<X, Y> extends XYChart<X, Y> {
   /**
    * @param series      the series to change
    * @param seriesIndex the index of the series
-   * @see GanttChart#createContainer(Series, int, Data, int)
    */
   @Override
   protected void seriesAdded(Series<X, Y> series, int seriesIndex) {

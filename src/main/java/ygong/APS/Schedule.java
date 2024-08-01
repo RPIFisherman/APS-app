@@ -461,8 +461,8 @@ public class Schedule implements Comparable<Schedule>,
 
   }
 
-  /**
-   * Helper class for Orders。
+   /**
+   * Helper class for Orders
    * <p> The class that takes the original Order as a reference and have
    * additional start time, end time, and status for schedule checking.
    * </p>
