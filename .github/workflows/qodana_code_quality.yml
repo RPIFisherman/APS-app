@@ -23,12 +23,13 @@ jobs:
           java-version: '21'
           cache: 'maven'
 
-      - name: 'Define Qodana Profile'
-        run: |
-          echo "version: \"1.0\"
-          profile:
-            name: qodana.recommended
-          projectJDK: 21" > qodana.yaml
+#      - name: 'Define Qodana Profile'
+#        run: |
+#          echo "version: \"1.0\"
+#          profile:
+#            name: qodana.recommended
+#          projectJDK: 21
+#          linter: jetbrains/qodana-jvm:latest" > qodana.yaml
 
       - name: 'Run headless test'
         uses: coactions/setup-xvfb@v1
