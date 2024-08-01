@@ -1,1 +1,1 @@
-packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"ygong.APS"}]
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"ygong.APS"}];updateSearchResults();
