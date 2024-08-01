@@ -30,8 +30,10 @@ jobs:
             name: qodana.recommended
           projectJDK: 21" > qodana.yaml
 
-      - name: 'Run Tests'
-        run: xvfb-run mvn verify --file pom.xml
+      - name: 'Run headless test'
+        uses: coactions/setup-xvfb@v1
+        with:
+          run: mvn verify --file pom.xml
 
       - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@v2024.1
