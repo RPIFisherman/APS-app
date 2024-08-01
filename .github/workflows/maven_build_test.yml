@@ -10,11 +10,12 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Setup Maven Action
-      uses: s4u/setup-maven-action@v1.14.0
+    - name: 'Setup Java'
+      uses: actions/setup-java@v2
       with:
-          java-version: 8
-          maven-version: 3.9.6
+        distribution: 'adopt'
+        java-version: '8'
+        cache: 'maven'
 
     - name: Check Java and Maven versions
       run: |
