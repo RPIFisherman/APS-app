@@ -172,8 +172,9 @@ class SchedulerTest {
         FxAssert.verifyThat(".chart-plot-background", Node::isVisible);
         FxAssert.verifyThat(".chart-horizontal-grid-lines", Node::isVisible);
         FxAssert.verifyThat(".chart-vertical-grid-lines", Node::isVisible);
-      }catch (Exception e){
-        System.err.println("UnsupportedOperationException: Not supported yet for headless environment");
+      } catch (Exception e) {
+        System.err.println(
+            "UnsupportedOperationException: Not supported yet for headless environment");
         e.printStackTrace();
       }
     }

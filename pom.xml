@@ -15,16 +15,10 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.version>3.9.6</maven.version>
         <javafx.version>18.0.1</javafx.version>
-        <jfreechart.version>1.5.3</jfreechart.version>
         <testfx.version>4.0.18</testfx.version>
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>org.jfree</groupId>
-            <artifactId>jfreechart</artifactId>
-            <version>${jfreechart.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>

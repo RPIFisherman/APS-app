@@ -16,8 +16,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Rectangle;
 
 /**
- * This GanttChart class is copied from
- * <a
+ * This GanttChart class is copied from <a
  * href="https://stackoverflow.com/questions/27975898/gantt-chart-from-scratch">Roland</a>
  *
  * @param <X> X-axis type

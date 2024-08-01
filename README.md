@@ -31,7 +31,8 @@ Thanks to [Roland's Gantt Plot code](https://stackoverflow.com/questions/2797589
 
 ## Requirements
 
-- Java 8 is recommended, other version may not work.
+- Java 21 is recommended, other version may not work.
+  - Java 8 can compile and run [APSDemo.java](src/main/java/APSDemo.java) but may not pass the test.
 - Maven 3.9.6 is recommended, other version may not work.
 
 ## APSDemo:
