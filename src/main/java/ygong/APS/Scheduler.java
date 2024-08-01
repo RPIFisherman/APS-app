@@ -122,7 +122,8 @@ public class Scheduler {
   /**
    * the minimum makespan of all schedules
    *
-   * @note this is the precisely calculated makespan including the switch
+   * <br> <strong>Note:</strong> this is the precisely calculated makespan
+   * including the switch
    * time between different orders
    */
   private double _min_makespan = Double.MAX_VALUE;

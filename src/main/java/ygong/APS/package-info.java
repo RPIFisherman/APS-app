@@ -11,7 +11,13 @@
  * prototype and is not intended for production use.
  * </p>
  *
- * @note We are only consider a order finished on a single machine which is a <a href="https://en.wikipedia.org/wiki/Unrelated-machines_scheduling"> unrelated machine scheduling problem</a> , not a <a href="https://en.wikipedia.org/wiki/Job-shop_scheduling" > job-shop schduling problem</a>
+ * <br> <strong>Note:</strong> We are only consider a order finished on a single
+ * machine which is a <a
+ * href="https://en.wikipedia.org/wiki/Unrelated-machines_scheduling"> unrelated
+ * machine scheduling problem</a> , not a <a
+ * href="https://en.wikipedia.org/wiki/Job-shop_scheduling" > job-shop schduling
+ * problem</a>
+ *
  * @author <a href="mailto:yuyanggong.rpi@gmail.com">Yuyang Gong</a>
  * @version 1.0
  * @since 1.0

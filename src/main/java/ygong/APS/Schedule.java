@@ -32,7 +32,11 @@ import java.util.Spliterator;
  *
  * @author <a href="mailto:yuyanggong.rpi@gmail.com">Yuyang Gong</a>
  * @version 1.0
- * @note The schedule is implemented as an ArrayList of {@link MachineWithOrders} and the grade is calculated based on the on-time percentage, makespan percentage, earliest start time percentage, and latest due time percentage. The grade is used to compare schedules and determine the best schedule.
+ * <br> <strong>Note:</strong> The schedule is implemented as an ArrayList of
+ * {@link MachineWithOrders} and the grade is calculated based on the on-time
+ * percentage, makespan percentage, earliest start time percentage, and latest
+ * due time percentage. The grade is used to compare schedules and determine the
+ * best schedule.
  * @see MachineWithOrders
  * @see OrderWithTime
  * @see Grade
@@ -198,7 +202,7 @@ public class Schedule implements Comparable<Schedule>,
    * @param est_weight      weight for the earliest start time percentage
    * @param ldt_weight      weight for the latest due time percentage
    * @return the Grade with percentage
-   * @note we can have weights in any kind of size
+   * <br> <strong>Note:</strong> we can have weights in any kind of size
    * @see Grade#calcGradeByWeights(int, int, int, int)
    * @see Grade
    */
@@ -321,8 +325,9 @@ public class Schedule implements Comparable<Schedule>,
    * additional orders and approximate run time for the machine.
    * </p>
    *
-   * @note if memory size is not big issue, we can extend Machine class
-   *       for memory efficiency, we use composition by reference
+   * <br> <strong>Note:</strong> if memory size is not big issue, we can extend
+   * Machine class
+   * for memory efficiency, we use composition by reference
    */
   public static class MachineWithOrders implements Iterable<OrderWithTime> {
 
@@ -363,8 +368,9 @@ public class Schedule implements Comparable<Schedule>,
      * @param o the order to be added, not checking if it is already in the
      *          machine
      * @return true if the order is added successfully, false otherwise
-     * @note This add order doesn't check if the order o is already in the
-     *       machine. Implement with caution.
+     * <br> <strong>Note:</strong> This add order doesn't check if the order o
+     * is already in the
+     * machine. Implement with caution.
      */
     protected boolean addOrder(Order o) {
       // check if producible
@@ -461,7 +467,7 @@ public class Schedule implements Comparable<Schedule>,
 
   }
 
-   /**
+  /**
    * Helper class for Orders
    * <p> The class that takes the original Order as a reference and have
    * additional start time, end time, and status for schedule checking.
@@ -475,11 +481,12 @@ public class Schedule implements Comparable<Schedule>,
    *    <dd>0b11 for violate delivery(MAGENTA), the order is executed after the delivery time</dd>
    * </dl>
    *
-   * @note if memory size is not big issue, we can extend Order class. But
+   * <br> <strong>Note:</strong> if memory size is not big issue, we can extend Order class. But
    *       for memory efficiency, we use composition by reference
-   * @note All the time variables in Order/OrderWithTime is in integer
+   * <br> <strong>Note:</strong> All the time variables in Order/OrderWithTime is in integer
    *       format, which may not enough for precision. We can change to double
    *       format if needed.
+   *
    * @see Order
    */
   public static class OrderWithTime {
@@ -537,7 +544,7 @@ public class Schedule implements Comparable<Schedule>,
      *   </tbody>
      * </table>
      *
-     * @note other digits are not used (for now), change to enum if needed
+     * <br> <strong>Note:</strong> other digits are not used (for now), change to enum if needed
      */
     private int status = 0b10000;
 
@@ -723,7 +730,9 @@ public class Schedule implements Comparable<Schedule>,
      * percentage and other longer ones get lower
      * </p>
      *
-     * @note this percentage can be negative if the makespan is over twice the best makespan
+     * <br> <strong>Note:</strong> this percentage can be negative if the
+     * makespan is over twice the best makespan
+     *
      * @see Schedule#calcStat(double, int)
      */
     protected final double makespan_percentage;
@@ -812,9 +821,9 @@ public class Schedule implements Comparable<Schedule>,
 
     /**
      * @return The grade score
-     * @note The grade need to be calculate first by
-     *      {@link Schedule#calcGradeByWeights(int, int, int, int)}
-     *      before get the grade
+     * <br> <strong>Note:</strong> The grade need to be calculate first by
+     * {@link Schedule#calcGradeByWeights(int, int, int, int)} before get the
+     * grade
      * @see Schedule#calcStat(double, int)
      * @see Schedule#calcGradeByWeights(int, int, int, int)
      */
