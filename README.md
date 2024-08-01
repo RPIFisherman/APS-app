@@ -1,5 +1,6 @@
 # Advanced Planning and Scheduling(APS) Application
-
+[![JavaDocs](https://img.shields.io/badge/javadoc-1.0.0-brightgreen.svg)](https://rpifisherman.github.io/APS-app/javadocs/index.html)
+[![APS-JavaDocs](https://img.shields.io/badge/APS_Package-JavaDocs-blue)](https://rpifisherman.github.io/APS-app/javadocs/ygong/APS/package-summary.html)
 ```text
          _                   _          _                 _                   _          _
         / /\                /\ \       / /\              / /\                /\ \       /\ \
@@ -23,8 +24,8 @@ implemented using the [javafx](https://openjfx.io/) library.
 
 [![Qodana](https://github.com/RPIFisherman/APS-app/actions/workflows/qodana_code_quality.yml/badge.svg)](https://github.com/RPIFisherman/APS-app/actions/workflows/qodana_code_quality.yml)
 [![Mirror GitHub Auto Queried Repos to Gitee](https://github.com/RPIFisherman/APS-app/actions/workflows/auto_sync.yml/badge.svg?branch=master)](https://github.com/RPIFisherman/APS-app/actions/workflows/auto_sync.yml)
-[![JavaDocs](https://img.shields.io/badge/javadoc-1.0.0-brightgreen.svg)](https://rpifisherman.github.io/APS-app/javadocs/index.html)
-[![APS-JavaDocs](https://img.shields.io/badge/APS_Package-JavaDocs-blue)](https://rpifisherman.github.io/APS-app/javadocs/ygong/APS/package-summary.html)
+[![codecov](https://codecov.io/gh/RPIFisherman/APS-app/graph/badge.svg?token=AZXVMKN3W2)](https://codecov.io/gh/RPIFisherman/APS-app)
+
 
 Thanks to [Roland's Gantt Plot code](https://stackoverflow.com/questions/27975898/gantt-chart-from-scratch), which helps me a lot on JavaFX. 
 
