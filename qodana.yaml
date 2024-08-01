@@ -9,19 +9,27 @@ profile:
   name: qodana.recommended
 
 #Specify the path to the project sources
-sources:
-  - src/main/java/
+#sources:
+#  - src/main/java/
+
+#groups:
+#  - groupID: Java File
+#    groups:
+#      - "category:Java"
+#      - "category:JVM languages"
+#      - "category:Spring"
+
+#Enable inspections
+include:
+    - name: VulnerableLibrariesGlobal
+    - name: JvmCoverageInspection
 
 #Disable inspections
 exclude:
   - name: All
     paths:
-      - docs/**
-  - name: JavadocDeclaration
+      - docs
 
-include:
-    - name: VulnerableLibrariesGlobal
-    - name: JvmCoverageInspection
 
 projectJDK: 21 #(Applied in CI/CD pipeline)
 
