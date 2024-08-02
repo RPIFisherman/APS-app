@@ -142,11 +142,7 @@ classDiagram
 
 ```mermaid
 graph TD
-    A[开始] --> init["<strong>输入</strong>
-<br> 产线，生产节拍（每小时生产该类型产品的数量）
-<br> 所有具有最早开始时间、交货时间、<br>最晚结束时间、数量、生产类型的订单
-<br> 规则 (资源放行，资源最大负荷，资源最小负荷)
-<br> 换行矩阵"]
+    A[开始] --> init["<strong>输入</strong>：<br> 产品类型数量，产线数量，订单数量，<br> 资源能力，资源最大负荷，资源最小负荷，<br> 方案最短总时间，订单类型换行时间"]
 init --> generateAllSchedules["调用 generateAllSchedules()必要约束条件"]
 subgraph "generateAllSchedules()"
 generateAllSchedules --> depthFirstSearch{"带约束的递归<br>depthFirstSearch()"}

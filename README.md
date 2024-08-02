@@ -145,11 +145,7 @@ classDiagram
 
 ```mermaid
 graph TD
-    A[Start] --> init["<br><strong>Input</strong>
-      <br> All the Machines with production pace per hour
-<br> All the Orders with earliest start time, delivery time, <br>latest due time, quantity, production type
-<br> Rules (belowCapacity, aboveCapacity, orderFitsMachine)
-<br> Switch Matrix"]
+    A[Start] --> init["<strong>Input</strong><br> All the Machines with production pace per hour<br> All the Orders with earliest start time, delivery time, <br>latest due time, quantity, production type<br> Rules (belowCapacity, aboveCapacity, orderFitsMachine)<br> Switch Matrix"]
 
 init --> generateAllSchedules["Call generateAllSchedules()"]
 subgraph "generateAllSchedules()"
