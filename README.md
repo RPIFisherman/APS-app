@@ -52,6 +52,7 @@ which helps me a lot on JavaFX.
 
 ![Scheduler Structure](docs/Scheduler_structure.png)
 
+Concise Diagram:
 ```mermaid
 classDiagram
     class Schedule {
@@ -59,16 +60,8 @@ classDiagram
         -Grade _grade
         +Schedule(ArrayList~Machine~ machines)
         +Schedule(Schedule s)
-        +double getMaxMakespan()
         +void calcStat(double min_makespan, int num_orders)
         +Grade calcGradeByWeights(int on_time_weight, int makespan_weight, int est_weight, int ldt_weight)
-        +int compareTo(Schedule o)
-        +double getGrade()
-        +int hashCode()
-        +String toString()
-        +Iterator~MachineWithOrders~ iterator()
-        +Spliterator~MachineWithOrders~ spliterator()
-        +MachineWithOrders getMachine(int i)
         +void scheduleAllOrders(Scheduler scheduler)
     }
 
@@ -81,11 +74,6 @@ classDiagram
         +boolean addOrder(Order o)
         +boolean removeOrder(Order o)
         +void scheduleAllOrders(Scheduler scheduler)
-        +void scheduleAllOrders()
-        +Iterator~OrderWithTime~ iterator()
-        +String getName()
-        +int getMachineID()
-        +ArrayList~OrderWithTime~ getOrders()
     }
 
     class Schedule_OrderWithTime {
@@ -93,18 +81,7 @@ classDiagram
         -int _start_time
         -int _end_time
         -int status
-        +OrderWithTime(Order order)
-        +OrderWithTime(OrderWithTime o)
-        +int getStartTime()
-        +int getEndTime()
-        +int getProductionTypeID()
-        +int getOrderID()
-        +String getColorCode()
-        +void setStartEndTime(double start_time, double end_time)
         +void setStartEndTime(int start_time, int end_time)
-        +int statusCheck()
-        +int hashCode()
-        +boolean equals(Object o)
     }
 
     class Schedule_Grade {
@@ -113,11 +90,7 @@ classDiagram
         -double est_percentage
         -double ldt_percentage
         -double grade
-        +Grade(double grade, double on_time, double makespan, double est_percentage, double ldt_percentage)
         +void calcGradeByWeights(int on_time_weight, int makespan_weight, int est_weight, int ldt_weight)
-        +String toString()
-        +double getGrade()
-        +int compareTo(Grade o)
     }
 
     class Machine {
@@ -128,8 +101,6 @@ classDiagram
         +Machine(Machine machine)
         +boolean checkViableOrder(int production_type_ID)
         +int getProductionPace(int production_type_id)
-        +int hashCode()
-        +String toString()
     }
 
     class Order {
@@ -140,35 +111,16 @@ classDiagram
         +int latest_due_time
         +int quantity
         +int production_type_ID
-        +Order(String name, int order_ID, int quantity, int production_type_ID, int earliest_start_time, int delivery_time, int latest_due_time)
-        +Order(Order o)
-        +String getName()
-        +int getOrderID()
-        +int getEarliestStartTime()
-        +int getDeliveryTime()
-        +int getLatestDueTime()
-        +int getQuantity()
-        +int getProductionTypeID()
-        +int hashCode()
-        +boolean equals(Object o)
-        +String toString()
     }
 
     class Rules {
-        +static double capacityLowerBound
-        +static double capacityUpperBound
         +static boolean belowCapacity(MachineWithOrders machine, double threshold)
-        +static boolean belowCapacity(MachineWithOrders machine)
         +static boolean aboveCapacity(MachineWithOrders machine, double threshold)
-        +static boolean aboveCapacity(MachineWithOrders machine)
         +static boolean orderFitsMachine(MachineWithOrders machine, OrderWithTime order)
-        +static boolean orderFitsMachine(MachineWithOrders machine, Order order)
     }
 
     class Scheduler {
         -List~Schedule~ _schedules
-        -ArrayList~Future~ _futures
-        -int _num_threads
         -ExecutorService _executor
         -int _num_production_types
         -int _num_machines
@@ -180,22 +132,8 @@ classDiagram
         -ArrayList~ArrayList~Double~~ _order_type_switch_times
         -ArrayList~Order~ _orders
         -ArrayList~Machine~ _machines
-        +Scheduler()
-        +Scheduler(int num_threads)
         +void generateAllPossible()
         +void calcAllSchedulesGrade(Integer... weights)
-        +ArrayList~Schedule~ getSchedules()
-        +GanttChart~Number, String~ createChart(int index)
-        +GanttChart~Number, String~ createChart(Schedule schedule)
-        +double getSwitchTime(int i, int j)
-        +int getMachineNum()
-        +int getOrderNum()
-        +double getMaxCapacityPerMachine()
-        +double getMinCapacityPerMachine()
-        +double getMinMakespan()
-        +List~Schedule~ getBestSchedule()
-        +List~Schedule~ getBestSchedule(int num)
-        +String toString()
     }
 
     Schedule "1" *-- "many" Schedule_MachineWithOrders
