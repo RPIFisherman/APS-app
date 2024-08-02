@@ -53,6 +53,7 @@ which helps me a lot on JavaFX.
 ![Scheduler Structure](docs/Scheduler_structure.png)
 
 ### Concise Diagram:
+
 ```mermaid
 classDiagram
     class Schedule {
@@ -70,6 +71,7 @@ classDiagram
         +boolean addOrder(Order o)
         +boolean removeOrder(Order o)
         +void scheduleAllOrders(Scheduler scheduler)
+        +void scheduleAllOrders()
     }
 
     class Schedule_OrderWithTime {
@@ -130,34 +132,39 @@ classDiagram
         +void calcAllSchedulesGrade(Integer... weights)
     }
 
-    Schedule "1" *-- "many" Schedule_MachineWithOrders : Contains many machines
-    Schedule_MachineWithOrders "1" *-- "many" Schedule_OrderWithTime : Contains many orders
-    Schedule_OrderWithTime "1" *-- "1" Order : refers to one order
-    Schedule_MachineWithOrders "1" *-- "1" Machine : refers to one machine
-    Schedule "1" *-- "1" Schedule_Grade : has one grade
-    Scheduler "1" *-- "1" Rules : can apply many rules
-    Scheduler "1" *-- "many" Schedule : has many schedules
+    Schedule "1" *-- "many" Schedule_MachineWithOrders: Contains many machines
+    Schedule_MachineWithOrders "1" *-- "many" Schedule_OrderWithTime: Contains many orders
+    Schedule_OrderWithTime "1" *-- "1" Order: refers to one order
+    Schedule_MachineWithOrders "1" *-- "1" Machine: refers to one machine
+    Schedule "1" *-- "1" Schedule_Grade: has one grade
+    Scheduler "1" *-- "1" Rules: can apply many rules
+    Scheduler "1" *-- "many" Schedule: has many schedules
 ```
 
 ## Project Workflow:
 
 ```mermaid
 graph TD
-    A[Start] --> init[Input]
-    init --> generateAllSchedules["Call generateAllSchedules()"]
-    subgraph "generateAllSchedules()"
-        generateAllSchedules --> depthFirstSearch{"Recursion with Constrains<br>depthFirstSearch()"}
-        depthFirstSearch -->|Satisfied| C[Add to _schedules]
-        depthFirstSearch -->|Unsatisfied| depthFirstSearch
-        C --> D["Call scheduleAllOrders()"]
-    end
-    D --> E[Output Schedules]
-    F[weights for grade] --> calcAllSchedulesGrade
-    E --> calcAllSchedulesGrade["Call calcAllSchedulesGrade()"]
-    subgraph "calcAllSchedulesGrade()"
-        calcAllSchedulesGrade --> calcGradeByWeights["Call calcGradeByWeights()"]
-        calcGradeByWeights --> Grade[Grade]
-    end
-    Grade --> G[Output Schedule with Grade]
-    G --> H[Generate Plot etc.]
+    A[Start] --> init["<br><strong>Input</strong>
+      <br> All the Machines with production pace per hour
+<br> All the Orders with earliest start time, delivery time, <br>latest due time, quantity, production type
+<br> Rules (belowCapacity, aboveCapacity, orderFitsMachine)
+<br> Switch Matrix"]
+
+init --> generateAllSchedules["Call generateAllSchedules()"]
+subgraph "generateAllSchedules()"
+generateAllSchedules --> depthFirstSearch{"Recursion with Constrains<br>depthFirstSearch()"}
+depthFirstSearch -->|Satisfied|C[Add to _schedules]
+%%depthFirstSearch -->|Unsatisfied|depthFirstSearch
+C --> D["Call scheduleAllOrders()"]
+end
+D --> E[Output Schedules]
+F[weights for grade] --> calcAllSchedulesGrade
+E --> calcAllSchedulesGrade["Call calcAllSchedulesGrade()"]
+subgraph "calcAllSchedulesGrade()"
+calcAllSchedulesGrade --> calcGradeByWeights["Call calcGradeByWeights()"]
+calcGradeByWeights --> Grade[Grade]
+end
+Grade --> G[Output Schedule with Grade]
+G --> H[Generate Plot etc.]
 ```

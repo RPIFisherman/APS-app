@@ -107,20 +107,7 @@ public class Schedule implements Comparable<Schedule>,
     assert !_machines.isEmpty() : "Machine list is empty";
     boolean allEmpty = _machines.stream().allMatch(m -> m.orders.isEmpty());
     assert !allEmpty : "All machines are empty";
-    /*
-     NOTE: not sure the parallel is really needed or not, here is a
-           commented out version for reference
-      if (_machines.size() > 100) {
-        AtomicReference<Double> maxMakespan = new AtomicReference<>((double)
-        0); _machines.parallelStream().map(m -> m.orders).forEach(o -> {
-          assert !o.isEmpty();
-          maxMakespan.set(
-              Math.max(maxMakespan.get(), o.stream().skip(o.size() -
-              1).findFirst().get()._end_time));
-        });
-        return maxMakespan.get();
-      }
-    */
+
     double max = 0;
     for (MachineWithOrders m : _machines) {
       ArrayList<OrderWithTime> o = m.orders;
@@ -326,8 +313,7 @@ public class Schedule implements Comparable<Schedule>,
    * </p>
    *
    * <br> <strong>Note:</strong> if memory size is not big issue, we can extend
-   * Machine class
-   * for memory efficiency, we use composition by reference
+   * Machine class for memory efficiency, we use composition by reference
    */
   public static class MachineWithOrders implements Iterable<OrderWithTime> {
 
@@ -369,8 +355,7 @@ public class Schedule implements Comparable<Schedule>,
      *          machine
      * @return true if the order is added successfully, false otherwise
      * <br> <strong>Note:</strong> This add order doesn't check if the order o
-     * is already in the
-     * machine. Implement with caution.
+     * is already in the machine. Implement with caution.
      */
     protected boolean addOrder(Order o) {
       // check if producible
