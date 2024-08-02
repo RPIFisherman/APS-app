@@ -153,7 +153,7 @@ Scheduler1858361680[
 <TR><TD ALIGN="LEFT" >-   _futures: ArrayList&lt;Future&lt;Double&gt;&gt; [0..*]</TD></TR>
 <TR><TD ALIGN="LEFT" >-   _machines: ArrayList&lt;Machine&gt; [0..*]</TD></TR>
 <TR><TD ALIGN="LEFT" >-   _max_capacity_per_machine: double [1]</TD></TR>
-<TR><TD ALIGN="LEFT" >-   _max_units_allowed: int [1]</TD></TR>
+<TR><TD ALIGN="LEFT" >-   _max_hours_allowed: int [1]</TD></TR>
 <TR><TD ALIGN="LEFT" >-   _min_capacity_per_machine: double [1]</TD></TR>
 <TR><TD ALIGN="LEFT" >-   _min_makespan: double [1]</TD></TR>
 <TR><TD ALIGN="LEFT" >-   _num_machines: int [1]</TD></TR>
@@ -171,8 +171,8 @@ Scheduler1858361680[
 <TR><TD ALIGN="LEFT" >+ generateAllPossible()</TD></TR>
 <TR><TD ALIGN="LEFT" >+ getBestSchedule(num: int): List&lt;Schedule&gt;</TD></TR>
 <TR><TD ALIGN="LEFT" ># getSwitchTime(i: int, j: int): double</TD></TR>
-<TR><TD ALIGN="LEFT" >+ init(num_order_types: int, num_machines: int, num_orders: int, max_units_allowed: int, max_capacity_per_machine: double, min_capacity_per_machine: double, machines: ArrayList&lt;Machine&gt;, orders: ArrayList&lt;Order&gt;, order_type_switch_times: ArrayList&lt;ArrayList&lt;Double&gt;&gt;)</TD></TR>
-<TR><TD ALIGN="LEFT" >+ initRandom(num_order_types: int, num_machines: int, num_orders: int, max_units_allowed: int, max_capacity_per_machine: double, min_capacity_per_machine: double, seed: Integer...)</TD></TR>
+<TR><TD ALIGN="LEFT" >+ init(num_order_types: int, num_machines: int, num_orders: int, max_hours_allowed: int, max_capacity_per_machine: double, min_capacity_per_machine: double, machines: ArrayList&lt;Machine&gt;, orders: ArrayList&lt;Order&gt;, order_type_switch_times: ArrayList&lt;ArrayList&lt;Double&gt;&gt;)</TD></TR>
+<TR><TD ALIGN="LEFT" >+ initRandom(num_order_types: int, num_machines: int, num_orders: int, max_hours_allowed: int, max_capacity_per_machine: double, min_capacity_per_machine: double, seed: Integer...)</TD></TR>
 </TABLE>>
 	style=filled
 	margin=0

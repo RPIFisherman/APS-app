@@ -37,7 +37,7 @@
 ## 项目结构：
 
 ### 简明图表：
-
+[![classDiagram-concise](https://img.shields.io/badge/mermaid-mermaid?style=for-the-badge&logo=mermaid&logoColor=%23FFFFFF&labelColor=%23FF3670&color=%23FF3670)](https://www.mermaidchart.com/raw/eac1bfb2-a39f-4aeb-a1f3-b894f8abc53f?theme=light&version=v0.1&format=svg)
 ```mermaid
 classDiagram
     class Schedule {
@@ -110,7 +110,7 @@ classDiagram
         -int _num_production_types  产品类型数量
         -int _num_machines  产线数量
         -int _num_orders    订单数量
-        -int _max_units_allowed   最大（小时/时间）量： 资源能力
+        -int _max_hours_allowed   资源能力
         -double _max_capacity_per_machine   资源最大负荷
         -double _min_capacity_per_machine   资源最小负荷
         -double _min_makespan
@@ -130,7 +130,7 @@ classDiagram
     Scheduler "1" *-- "许多个" Schedule : 包含多个可能的排程
 ```
 
-## Project Workflow:
+## APS 排程算法流程图：
 
 ```mermaid
 graph TD

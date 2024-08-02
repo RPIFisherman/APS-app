@@ -76,7 +76,7 @@ public class Scheduler {
   private int _num_production_types = -1;
 
   /**
-   * number of machines/production lines/production units... {@link Order}
+   * number of machines/production lines/production hours... {@link Order}
    */
   private int _num_machines = -1;
 
@@ -86,18 +86,18 @@ public class Scheduler {
   private int _num_orders = -1;
 
   /**
-   * the 'maximum'(actually recommend) units allowed for all orders to be
+   * the 'maximum'(actually recommend) hours allowed for all orders to be
    * schedules
    */
-  private int _max_units_allowed = -1;
+  private int _max_hours_allowed = -1;
 
   /**
    * the maximum capacity that can be <strong>Overload</strong> on machine
    * <br>
-   * e.g. We have 40 units of {@link Scheduler#_max_units_allowed} on a machine
+   * e.g. We have 40 hours of {@link Scheduler#_max_hours_allowed} on a machine
    * with 1.5
    * <strong>{@code Scheduler._max_capacity_per_machine}</strong>. Then we
-   * allowed total <strong>40*1.5= 60</strong> units of rough working time on
+   * allowed total <strong>40*1.5= 60</strong> hours of rough working time on
    * each machine
    *
    * @see Rules
@@ -109,11 +109,11 @@ public class Scheduler {
    * <br>
    * Similar to {@link Scheduler#_max_capacity_per_machine}
    * <br>
-   * e.g. We have 40 units of {@link Scheduler#_max_units_allowed} on each
+   * e.g. We have 40 hours of {@link Scheduler#_max_hours_allowed} on each
    * machine with 0.5
    * <strong>{@code Scheduler._min_capacity_per_machine}</strong>. Then we have
-   * <strong>40*0.5= 20</strong> units of rough working time on each machine.
-   * If the machine works less than 20 units, the schedule is invalid.
+   * <strong>40*0.5= 20</strong> hours of rough working time on each machine.
+   * If the machine works less than 20 hours, the schedule is invalid.
    *
    * @see Rules
    */
@@ -266,7 +266,7 @@ public class Scheduler {
    * @param num_order_types          the number of order types
    * @param num_machines             the number of machines
    * @param num_orders               the number of orders
-   * @param max_units_allowed        the maximum units allowed for all orders to
+   * @param max_hours_allowed        the maximum hours allowed for all orders to
    *                                 be scheduled
    * @param max_capacity_per_machine the maximum capacity that can be Overload
    *                                 on a machine
@@ -281,7 +281,7 @@ public class Scheduler {
    *                        list
    */
   public void init(final int num_order_types, final int num_machines,
-      final int num_orders, final int max_units_allowed,
+      final int num_orders, final int max_hours_allowed,
       final double max_capacity_per_machine,
       final double min_capacity_per_machine, final ArrayList<Machine> machines,
       final ArrayList<Order> orders,
@@ -293,13 +293,13 @@ public class Scheduler {
     for (ArrayList<Double> o : order_type_switch_times) {
       assert o.size() == num_order_types;
     }
-    Rules.capacityLowerBound = _max_units_allowed * _min_capacity_per_machine;
-    Rules.capacityUpperBound = _max_units_allowed * _max_capacity_per_machine;
+    Rules.capacityLowerBound = _max_hours_allowed * _min_capacity_per_machine;
+    Rules.capacityUpperBound = _max_hours_allowed * _max_capacity_per_machine;
 
     this._num_machines = num_machines;
     this._num_production_types = num_order_types;
     this._num_orders = num_orders;
-    this._max_units_allowed = max_units_allowed;
+    this._max_hours_allowed = max_hours_allowed;
     this._max_capacity_per_machine = max_capacity_per_machine;
     this._min_capacity_per_machine = min_capacity_per_machine;
     this._machines = machines;
@@ -314,7 +314,7 @@ public class Scheduler {
    * @param num_order_types          the number of order types
    * @param num_machines             the number of machines
    * @param num_orders               the number of orders
-   * @param max_units_allowed        the maximum units allowed for all orders to
+   * @param max_hours_allowed        the maximum hours allowed for all orders to
    *                                 be scheduled
    * @param max_capacity_per_machine the maximum capacity that can be Overload
    *                                 on a machine
@@ -322,7 +322,7 @@ public class Scheduler {
    *                                 work
    * @param seed                     the random seed
    * @throws AssertionError if the number of order types, machines, orders, max
-   *                        units allowed, max capacity per machine, min
+   *                        hours allowed, max capacity per machine, min
    *                        capacity per machine is less than or equal to zero
    *                        or the max capacity per machine is less than the min
    *                        capacity per machine
@@ -330,21 +330,21 @@ public class Scheduler {
    * ArrayList, ArrayList)
    */
   public void initRandom(final int num_order_types, final int num_machines,
-      final int num_orders, final int max_units_allowed,
+      final int num_orders, final int max_hours_allowed,
       final double max_capacity_per_machine,
       final double min_capacity_per_machine, Integer... seed)
       throws AssertionError {
     System.out.println(
         "Init Random Scheduler: order_types: " + num_order_types + " machines: "
-            + num_machines + " orders: " + num_orders + " max_units_allowed: "
-            + max_units_allowed + " max_capacity_per_machine: "
+            + num_machines + " orders: " + num_orders + " max_hours_allowed: "
+            + max_hours_allowed + " max_capacity_per_machine: "
             + max_capacity_per_machine + " min_capacity_per_machine: "
             + min_capacity_per_machine);
     assert seed.length <= 1;
     assert num_order_types > 0;
     assert num_machines > 0;
     assert num_orders > 0;
-    assert max_units_allowed > 0;
+    assert max_hours_allowed > 0;
     assert max_capacity_per_machine > 0;
     assert min_capacity_per_machine >= 0;
     assert max_capacity_per_machine > min_capacity_per_machine;
@@ -365,11 +365,11 @@ public class Scheduler {
     Random random = new Random(RANDOM_SEED);
 
     // assign check const
-    _max_units_allowed = max_units_allowed;
+    _max_hours_allowed = max_hours_allowed;
     _max_capacity_per_machine = max_capacity_per_machine;
     _min_capacity_per_machine = min_capacity_per_machine;
-    Rules.capacityLowerBound = _max_units_allowed * _min_capacity_per_machine;
-    Rules.capacityUpperBound = _max_units_allowed * _max_capacity_per_machine;
+    Rules.capacityLowerBound = _max_hours_allowed * _min_capacity_per_machine;
+    Rules.capacityUpperBound = _max_hours_allowed * _max_capacity_per_machine;
 
     // generate order types
     _num_production_types = num_order_types;
@@ -491,7 +491,7 @@ public class Scheduler {
     xAxis.setForceZeroInRange(true);
     xAxis.setAutoRanging(false);
     xAxis.setLowerBound(0);
-    xAxis.setUpperBound(_max_units_allowed * _max_capacity_per_machine);
+    xAxis.setUpperBound(_max_hours_allowed * _max_capacity_per_machine);
     yAxis.setLabel("Machine name");
     yAxis.setTickLabelFill(Color.CHOCOLATE);
     yAxis.setTickLabelGap(10);
@@ -622,7 +622,7 @@ public class Scheduler {
     return "Scheduler{" + "_schedules=" + _schedules + " _num_threads="
         + _num_threads + ", _num_production_types=" + _num_production_types
         + ", _num_machines=" + _num_machines + ", _num_orders=" + _num_orders
-        + ", _max_units_allowed=" + _max_units_allowed
+        + ", _max_hours_allowed=" + _max_hours_allowed
         + ", _max_capacity_per_machine=" + _max_capacity_per_machine
         + ", _min_capacity_per_machine=" + _min_capacity_per_machine
         + ", _min_makespan=" + _min_makespan + ", _order_type_switch_times="

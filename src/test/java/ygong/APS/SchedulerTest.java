@@ -30,7 +30,7 @@ class SchedulerTest {
   static final int num_order_types = 3;
   static final int num_machines = 2;
   static final int num_orders = 10;
-  static final int max_units = 20;
+  static final int max_hours = 20;
   static final double max_capacity = 1.3;
   static final double min_capacity = 0.50;
   static final int seed = 1337;
@@ -39,7 +39,7 @@ class SchedulerTest {
   @BeforeEach
   void setUp() {
     scheduler = new Scheduler();
-    scheduler.initRandom(num_order_types, num_machines, num_orders, max_units,
+    scheduler.initRandom(num_order_types, num_machines, num_orders, max_hours,
         max_capacity, min_capacity, seed);
   }
 
@@ -72,7 +72,7 @@ class SchedulerTest {
 
     // test lose bound
     scheduler = new Scheduler();
-    scheduler.initRandom(num_order_types, num_machines, num_orders, max_units,
+    scheduler.initRandom(num_order_types, num_machines, num_orders, max_hours,
         3.0, 0.0, seed);
     scheduler.generateAllPossible();
     schedules = scheduler.getSchedules();
@@ -86,7 +86,7 @@ class SchedulerTest {
 
     // test Max Capacity upper bound
     scheduler = new Scheduler();
-    scheduler.initRandom(num_order_types, num_machines, num_orders, max_units,
+    scheduler.initRandom(num_order_types, num_machines, num_orders, max_hours,
         min_capacity + 0.0001, min_capacity, seed);
     scheduler.generateAllPossible();
     schedules = scheduler.getSchedules();
@@ -94,7 +94,7 @@ class SchedulerTest {
 
     // test Min Capacity lower bound
     scheduler = new Scheduler();
-    scheduler.initRandom(num_order_types, num_machines, num_orders, max_units,
+    scheduler.initRandom(num_order_types, num_machines, num_orders, max_hours,
         max_capacity, max_capacity - 0.0000001, seed);
     scheduler.generateAllPossible();
     schedules = scheduler.getSchedules();
@@ -150,7 +150,7 @@ class SchedulerTest {
     @Start
     void start(Stage stage) {
       scheduler = new Scheduler();
-      scheduler.initRandom(num_order_types, num_machines, num_orders, max_units,
+      scheduler.initRandom(num_order_types, num_machines, num_orders, max_hours,
           max_capacity, min_capacity, seed);
       scheduler.generateAllPossible();
 

@@ -119,7 +119,7 @@ classDiagram
         -int _num_production_types
         -int _num_machines
         -int _num_orders
-        -int _max_units_allowed
+        -int _max_hours_allowed
         -double _max_capacity_per_machine
         -double _min_capacity_per_machine
         -double _min_makespan

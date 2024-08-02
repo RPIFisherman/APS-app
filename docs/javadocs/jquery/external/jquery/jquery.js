@@ -4759,7 +4759,7 @@ function adjustCSS( elem, prop, valueParts, tween ) {
 		// Halve the iteration target value to prevent interference from CSS upper bounds (gh-2144)
 		initial = initial / 2;
 
-		// Trust units reported by jQuery.css
+		// Trust hours reported by jQuery.css
 		unit = unit || initialInUnit[ 3 ];
 
 		// Iteratively approximate from a nonzero starting point
