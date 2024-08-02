@@ -58,8 +58,6 @@ classDiagram
     class Schedule {
         -ArrayList~MachineWithOrders~ _machines
         -Grade _grade
-        +Schedule(ArrayList~Machine~ machines)
-        +Schedule(Schedule s)
         +void calcStat(double min_makespan, int num_orders)
         +Grade calcGradeByWeights(int on_time_weight, int makespan_weight, int est_weight, int ldt_weight)
         +void scheduleAllOrders(Scheduler scheduler)
@@ -69,8 +67,6 @@ classDiagram
         -Machine machine
         -ArrayList~OrderWithTime~ orders
         -double _approx_run_time
-        +MachineWithOrders(Machine machine)
-        +MachineWithOrders(MachineWithOrders machine)
         +boolean addOrder(Order o)
         +boolean removeOrder(Order o)
         +void scheduleAllOrders(Scheduler scheduler)
@@ -97,8 +93,6 @@ classDiagram
         +String name
         +int machine_ID
         -HashMap~Integer, Integer~ products_pace_per_hour
-        +Machine(String name, int machine_ID, HashMap~Integer, Integer~ products_pace_per_hour)
-        +Machine(Machine machine)
         +boolean checkViableOrder(int production_type_ID)
         +int getProductionPace(int production_type_id)
     }
