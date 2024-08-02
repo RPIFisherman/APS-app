@@ -145,22 +145,29 @@ classDiagram
 
 ```mermaid
 graph TD
-    A[Start] --> init["<strong>Input</strong><br> All the Machines with production pace per hour<br> All the Orders with earliest start time, delivery time, <br>latest due time, quantity, production type<br> Rules (belowCapacity, aboveCapacity, orderFitsMachine)<br> Switch Matrix"]
-
-init --> generateAllSchedules["Call generateAllSchedules()"]
-subgraph "generateAllSchedules()"
-generateAllSchedules --> depthFirstSearch{"Recursion with Constrains<br>depthFirstSearch()"}
-depthFirstSearch -->|Satisfied|C[Add to _schedules]
-%%depthFirstSearch -->|Unsatisfied|depthFirstSearch
-C --> D["Call scheduleAllOrders()"]
-end
-D --> E[Output Schedules]
-F[weights for grade] --> calcAllSchedulesGrade
-E --> calcAllSchedulesGrade["Call calcAllSchedulesGrade()"]
-subgraph "calcAllSchedulesGrade()"
-calcAllSchedulesGrade --> calcGradeByWeights["Call calcGradeByWeights()"]
-calcGradeByWeights --> Grade[Grade]
-end
-Grade --> G[Output Schedule with Grade]
-G --> H[Generate Plot etc.]
+    A[Start] --> init["<strong>init()</strong><br> All the Machines with production pace per hour<br> All the Orders with earliest start time, delivery time, <br>latest due time, quantity, production type<br> Rules (belowCapacity, aboveCapacity, orderFitsMachine)<br> Switch Matrix"]
+    subgraph "Input"
+        init
+        rules["Hard Requirements"]
+        F[weights for grade]
+    end
+    subgraph "generateAllSchedules()"
+        init --> depthFirstSearch{"Recursion with Constrains<br>depthFirstSearch()"}
+        rules --> depthFirstSearch{"Recursion with Constrains<br>depthFirstSearch()"}
+        depthFirstSearch -->|Satisfied| C["Add to schedules"]
+    %%depthFirstSearch -->|Unsatisfied|depthFirstSearch
+        C --> D["Call scheduleAllOrders()"]
+    end
+    D --> E[Output Schedules]
+    F --> calcStat["Call calcStat()"]
+    E --> calcStat
+    subgraph "Call calcAllSchedulesGrade()"
+        subgraph "forEach schedules"
+            calcStat --> calcGradeByWeights["Call calcGradeByWeights()"]
+            calcGradeByWeights --> Grade[Grade]
+        end
+        Grade --> sort[Sort by Grade]
+    end
+    sort --> G[Output Schedule with Grade is descending order]
+    G --> H[Generate Plot etc.]
 ```

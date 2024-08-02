@@ -57,8 +57,8 @@ classDiagram
         -double _approx_run_time 产线的大致运行时间
         +boolean addOrder(Order o) 添加订单
         +boolean removeOrder(Order o) 移除订单
-        +void scheduleAllOrders(Scheduler scheduler) 排程所有订单，计算换行时间
-        +void scheduleAllOrders() 排程所有订单，无换行时间
+        +void scheduleAllOrders(Scheduler scheduler) 排程所有订单，计算换型时间
+        +void scheduleAllOrders() 排程所有订单，无换型时间
     }
 
     class Schedule_OrderWithTime {
@@ -140,24 +140,36 @@ classDiagram
 
 ## APS 排程算法流程图：
 
+All the Machines with production pace per hour
+All the Orders with earliest start time, delivery time,
+latest due time, quantity, production type
+Rules (belowCapacity, aboveCapacity, orderFitsMachine)
+Switch Matrix
 ```mermaid
 graph TD
-    A[开始] --> init["<strong>输入</strong>：<br> 产品类型数量，产线数量，订单数量，<br> 资源能力，资源最大负荷，资源最小负荷，<br> 方案最短总时间，订单类型换行时间"]
-init --> generateAllSchedules["调用 generateAllSchedules()必要约束条件"]
-subgraph "generateAllSchedules()"
-generateAllSchedules --> depthFirstSearch{"带约束的递归<br>depthFirstSearch()"}
-depthFirstSearch -->|满足必要约束条件|C[添加到 _schedules]
-%%depthFirstSearch -->|不满足必要约束条件|depthFirstSearch
-C --> D["调用 scheduleAllOrders()计算开始时间、结束时间"]
-end
-D --> E[输出可能的排程方案]
-F[等级权重] --> calcAllSchedulesGrade
-E --> calcAllSchedulesGrade["调用 calcAllSchedulesGrade()"]
-subgraph "calcAllSchedulesGrade()"
-calcAllSchedulesGrade --> calcStat["调用 calcStat()计算占比"]
-calcStat --> calcGradeByWeights["调用 calcGradeByWeights()计算权重"]
-calcGradeByWeights --> Grade[Grade]
-end
-Grade --> G[输出带评价分数的排程方案]
-G --> H[生成图表等]
+    A[开始] --> init["<strong>调用init()</strong>：<br> 产线（各种产品的节拍），<br> 订单（最早开工/交付/最晚交付时间，数量，产品类型），<br> 资源能力，资源最大负荷，资源最小负荷，产品类型换型矩阵"]
+    subgraph "初始化"
+        init
+        rules["必要约束条件"]
+        F["打分权重"]
+    end
+    init --> depthFirstSearch["调用 generateAllSchedules()必要约束条件"]
+    subgraph "调用 generateAllSchedules()"
+        rules --> depthFirstSearch{"带约束的递归<br>depthFirstSearch()"}
+        depthFirstSearch -->|满足必要约束条件| C[添加到 _schedules]
+    %%depthFirstSearch -->|不满足必要约束条件|depthFirstSearch
+        C --> D["调用 scheduleAllOrders()计算开始时间、结束时间"]
+    end
+    D --> E[输出可能的排程方案]
+    F --> calcStat["调用 calcStat()计算占比"]
+    E --> calcStat
+    subgraph "调用 calcAllSchedulesGrade()"
+        subgraph "每个排程方案"
+            calcStat --> calcGradeByWeights["调用 calcGradeByWeights()计算权重"]
+            calcGradeByWeights --> Grade[Grade]
+        end
+        Grade --> sort[根据最终分数从高到低排序]
+    end
+    sort --> G[输出评价分数从高到低的排程方案]
+    G --> H[生成图表等]
 ```
