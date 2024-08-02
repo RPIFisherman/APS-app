@@ -52,7 +52,7 @@ which helps me a lot on JavaFX.
 
 ![Scheduler Structure](docs/Scheduler_structure.png)
 
-Concise Diagram:
+### Concise Diagram:
 ```mermaid
 classDiagram
     class Schedule {
@@ -130,13 +130,13 @@ classDiagram
         +void calcAllSchedulesGrade(Integer... weights)
     }
 
-    Schedule "1" *-- "many" Schedule_MachineWithOrders
-    Schedule_MachineWithOrders "1" *-- "many" Schedule_OrderWithTime
-    Schedule_OrderWithTime "1" *-- "1" Order
-    Schedule_MachineWithOrders "1" *-- "1" Machine
-    Schedule "1" *-- "1" Schedule_Grade
-    Scheduler "1" *-- "1" Rules
-    Scheduler "1" *-- "1" Schedule
+    Schedule "1" *-- "many" Schedule_MachineWithOrders : Contains many machines
+    Schedule_MachineWithOrders "1" *-- "many" Schedule_OrderWithTime : Contains many orders
+    Schedule_OrderWithTime "1" *-- "1" Order : refers to one order
+    Schedule_MachineWithOrders "1" *-- "1" Machine : refers to one machine
+    Schedule "1" *-- "1" Schedule_Grade : has one grade
+    Scheduler "1" *-- "1" Rules : can apply many rules
+    Scheduler "1" *-- "many" Schedule : has many schedules
 ```
 
 ## Project Workflow:

@@ -2,7 +2,7 @@
 
 [![JavaDocs](https://img.shields.io/badge/javadoc-1.0.0-brightgreen.svg)](https://rpifisherman.github.io/APS-app/javadocs/index.html)
 [![APS-JavaDocs](https://img.shields.io/badge/APS_Package-JavaDocs-blue)](https://rpifisherman.github.io/APS-app/javadocs/ygong/APS/package-summary.html)
-[![README-Chinese](https://img.shields.io/badge/README-Chinese-red)](README_CN.md)
+[![README-English](https://img.shields.io/badge/README-English-blue)](README.md)
 
 ```text
          _                   _          _                 _                   _          _
@@ -36,12 +36,11 @@
 
 ## 项目结构：
 
-简明图表：
+### 简明图表：
 
 ```mermaid
 classDiagram
     class Schedule {
-        基于Scheduler生成的单独的一种排程
         -ArrayList~MachineWithOrders~ _machines 所有产线
         -Grade _grade   评分
         +void calcStat(double min_makespan, int num_orders) 计算统计，统计结果存入Grade
@@ -122,13 +121,13 @@ classDiagram
         +void calcAllSchedulesGrade(Integer... weights) 根据权重计算所有排程的评分
     }
 
-    Schedule "1" *-- "many" Schedule_MachineWithOrders
-    Schedule_MachineWithOrders "1" *-- "many" Schedule_OrderWithTime
-    Schedule_OrderWithTime "1" *-- "1" Order
-    Schedule_MachineWithOrders "1" *-- "1" Machine
-    Schedule "1" *-- "1" Schedule_Grade
-    Scheduler "1" *-- "1" Rules
-    Scheduler "1" *-- "1" Schedule
+    Schedule "1" *-- "许多个" Schedule_MachineWithOrders : 包含多个产线
+    Schedule_MachineWithOrders "1" *-- "许多个" Schedule_OrderWithTime : 包含多个订单
+    Schedule_OrderWithTime "1" *-- "1" Order : 对应一个订单
+    Schedule_MachineWithOrders "1" *-- "1" Machine  : 对应一个产线
+    Schedule "1" *-- "1" Schedule_Grade : 包含一个评分
+    Scheduler "1" *-- "1" Rules : 调用必要约束条件
+    Scheduler "1" *-- "许多个" Schedule : 包含多个可能的排程
 ```
 
 ## Project Workflow:
